@@ -75,8 +75,8 @@ let map_from_file path units affects =
   let cells = js |> member "cells" |> to_list in
   let baseCell = Cell(false, 1, []) in
   let gameCells =
-    Array.make_matrix ~dimx:width ~dimy:height baseCell in
-  let rec fillCells i str =
+    Array.make_matrix ~dimx:height ~dimy:width baseCell in
+  let fillCells i str =
     let addArr j c =
       let add = 
         match c with
