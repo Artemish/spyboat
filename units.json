@@ -1,0 +1,46 @@
+{
+"units" : [
+  {
+    "name": "Hack 3.0",
+    "description": "THE TOP OF THE HACK SERIES",
+    "moveRate": 4,
+    "maxSize": 4,
+    "attacks": [
+      "SLICE",
+      "MUTILATE"
+    ]
+  }, {
+    "name": "Guard Dog",
+    "description": "WHO LET THE DOGS OUT?",
+    "moveRate": 3,
+    "maxSize": 3,
+    "attacks": [
+      "BYTE"
+    ]
+  }, {
+    "name": "Fire Wall",
+    "description": "KEEPS UNWANTED PROGRAMS OUT OF CORPORATE SECTORS",
+    "moveRate": 2,
+    "maxSize": 20,
+    "attacks": [
+      "BURN"
+    ]
+  }, {
+    "name": "Sumo",
+    "description": "A MASSIVE AND SLOW-MOVING POWERHOUSE",
+    "moveRate": 2,
+    "maxSize": 12,
+    "attacks": [
+      "DATASLAM"
+    ]
+  }, {
+    "name": "Radar",
+    "description": "DEADLY PROGRAM ERADICATOR",
+    "moveRate": 0,
+    "maxSize": 1,
+    "attacks": [
+      "PONG"
+    ]
+  }
+]
+}

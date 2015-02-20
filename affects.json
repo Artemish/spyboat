@@ -1,0 +1,53 @@
+{
+  "affects": [
+  {
+    "name": "DATASLAM",
+    "description": "SIZE REQ:6, DELETES 8 SECTORS FROM TARGET",
+    "type": "health",
+    "range": 1,
+    "magnitude": 8,
+    "requiredSize": 6,
+    "cost": 0
+  }, {
+    "name": "PONG",
+    "description": "RANGE:5, DELETES 2 SECTORS FROM TARGET",
+    "type": "health",
+    "range": 5,
+    "magnitude": 2,
+    "requiredSize": 0,
+    "cost": 0
+  }, {
+    "name": "BURN",
+    "description": "DELETES 1 SECTOR FROM TARGET",
+    "type": "health",
+    "range": 1,
+    "magnitude": 1,
+    "requiredSize": 0,
+    "cost": 0
+  }, {
+    "name": "BYTE",
+    "description": "DELETES 2 SECTORS FROM TARGET",
+    "type": "health",
+    "range": 1,
+    "magnitude": 2,
+    "requiredSize": 0,
+    "cost": 0
+  }, {
+    "name": "SLICE",
+    "description": "DELETES 2 SECTORS FROM TARGET",
+    "type": "health",
+    "range": 1,
+    "magnitude": 2,
+    "requiredSize": 0,
+    "cost": 0
+  }, {
+    "name": "MUTILATE",
+    "description": "DELETES 4 SECTORS FROM TARGET",
+    "type": "health",
+    "range": 1,
+    "magnitude": 4,
+    "requiredSize": 4,
+    "cost": 0
+  }
+]
+}
