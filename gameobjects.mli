@@ -20,14 +20,6 @@ and credit =
 and map =
   Map of (int * int * cell array array * position list * unitstate list)
 
-let get_affect_name affect = 
-  let Affect(name, _, _, _, _, _) = affect in
-  name
-
-let get_baseunit_name baseunit = 
-  let UnitTemplate(name, _, _, _, _) = baseunit in
-  name
-
-let make_unit baseunit sectors =
-  let UnitTemplate(_, _, _, maxsize, moverate) = baseunit in
-  (baseunit, sectors, maxsize, moverate, false)
+val get_affect_name : affect -> string
+val get_baseunit_name : baseunit -> string
+val make_unit : baseunit -> position list -> unitstate

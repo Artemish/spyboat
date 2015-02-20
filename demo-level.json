@@ -26,20 +26,16 @@
 
   "units": [
     { "name": "Guard Dog",
-      "sectors": [{"x": 2, "y": 6}],
-      "alignment": 1 },
+      "sectors": [{"x": 2, "y": 6}]},
 
     { "name": "Guard Dog",
-      "sectors": [{"x": 6, "y": 6}],
-      "alignment": 1 },
+      "sectors": [{"x": 6, "y": 6}]},
 
     { "name": "Guard Dog",
-      "sectors": [{"x": 9, "y": 6}],
-      "alignment": 1 },
+      "sectors": [{"x": 9, "y": 6}]},
 
     { "name": "Guard Dog",
-      "sectors": [{"x": 13, "y": 6}],
-      "alignment": 1 },
+      "sectors": [{"x": 13, "y": 6}]},
 
     { "name": "Fire Wall",
       "sectors": [
@@ -54,8 +50,7 @@
         {"x": 4, "y": 9},
         {"x": 5, "y": 9},
         {"x": 5, "y": 8}
-      ],
-      "alignment": 1 },
+      ]},
 
     { "name": "Fire Wall",
       "sectors": [
@@ -70,8 +65,7 @@
         {"x": 11, "y": 9},
         {"x": 10, "y": 9},
         {"x": 10, "y": 8}
-      ],
-      "alignment": 1 },
+      ]},
 
     { "name": "Sumo",
       "sectors": [
@@ -82,16 +76,13 @@
         {"x": 3, "y": 11},
         {"x": 2, "y": 11},
         {"x": 1, "y": 11}
-      ],
-      "alignment": 1 },
+      ]},
 
     { "name": "Radar",
-      "sectors": [{"x": 7, "y": 10}],
-      "alignment": 1 },
+      "sectors": [{"x": 7, "y": 10}]},
 
     { "name": "Radar",
-      "sectors": [{"x": 8, "y": 10}],
-      "alignment": 1 },
+      "sectors": [{"x": 8, "y": 10}]},
 
     { "name": "Sumo",
       "sectors": [
@@ -102,7 +93,6 @@
         {"x": 12, "y": 11},
         {"x": 13, "y": 11},
         {"x": 14, "y": 11}
-      ],
-      "alignment": 1 }
+      ]}
   ]
 }

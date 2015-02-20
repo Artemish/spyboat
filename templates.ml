@@ -1,6 +1,34 @@
 open Core.Std
 open Yojson
 open Gameobjects
+open Yojson.Basic.Util
+
+let affect_from_name affects nameobj =
+  let name = nameobj |> to_string in
+  let same_name affect = 
+    (String.compare name (get_affect_name affect) = 0)
+  in
+  let opt = List.find ~f:same_name affects in
+  match opt with
+  | Some(res) -> res
+  | None -> raise (Invalid_argument ("No such affect: " ^ name ^ "."))
+
+let unit_from_name units name =
+  let same_name gunit = 
+    (String.compare name (get_baseunit_name gunit) = 0)
+  in
+  let opt = List.find ~f:same_name units in
+  match opt with
+  | Some(res) -> res
+  | None -> raise (Invalid_argument ("No such affect: " ^ name ^ "."))
+
+let to_pos_list lst = 
+  let make_pos el =
+    let x = el |> member "x" |> to_int in
+    let y = el |> member "y" |> to_int in
+    (x, y)
+  in
+  List.map ~f:make_pos lst
 
 let affects_from_file path =
   let get_affect_type name magnitude =
@@ -21,7 +49,6 @@ let affects_from_file path =
       raise (Invalid_argument ("No such affect type: " ^ name ^ "."))
   in
 
-  let open Yojson.Basic.Util in
   let buf = In_channel.read_all path in
   let js = Yojson.Basic.from_string buf in
   let affects_lst = js |> member "affects" |> to_list in
@@ -49,29 +76,18 @@ let units_from_file path affects =
     let moveRate = item |> member "moveRate" |> to_int in
     let maxSize = item |> member "maxSize" |> to_int in
     let attacks = item |> member "attacks" |> to_list in
-    let affect_from_name nameobj =
-      let name = nameobj |> to_string in
-      let same_name affect = 
-        (String.compare name (get_affect_name affect) = 0)
-      in
-      let opt = List.find ~f:same_name affects in
-      match opt with
-      | Some(res) -> res
-      | None -> raise (Invalid_argument ("No such affect: " ^ name ^ "."))
-    in
-    let attacks = List.map ~f:affect_from_name attacks in
+    let attacks = List.map ~f:(affect_from_name affects) attacks in
     UnitTemplate(name, desc, attacks, maxSize, moveRate)
   in 
   List.map ~f:get_unit unit_lst
 
 let map_from_file path units affects =
-  let open Yojson.Basic.Util in
   let buf = In_channel.read_all path in
   let js = Yojson.Basic.from_string buf in
   let width = js |> member "width" |> to_int in
   let height = js |> member "height" |> to_int in
   let spawns = js |> member "spawn-points" |> to_list in
-  let units = js |> member "units" |> to_list in
+  let enemies = js |> member "units" |> to_list in
   let cells = js |> member "cells" |> to_list in
   let baseCell = Cell(false, 1, []) in
   let gameCells =
@@ -89,6 +105,19 @@ let map_from_file path units affects =
     let chars = String.to_list (str |> to_string) in
     List.iteri ~f:addArr chars
   in
+
+  let spawns = to_pos_list spawns in
+
+  let get_unit el = 
+    let name = el |> member "name" |> to_string in
+    let baseunit = unit_from_name units name in
+    let sectors = el |> member "sectors" |> to_list in
+    let sectors = to_pos_list sectors in
+    make_unit baseunit sectors
+  in
+
+  let enemies = List.map ~f:get_unit enemies in
+
   List.iteri ~f:fillCells cells;
 
-  gameCells
+  Map(width, height, gameCells, spawns, enemies)

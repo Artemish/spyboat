@@ -9,4 +9,4 @@ val units_from_file :
   string -> affect list -> baseunit list
 
 val map_from_file :
-  string -> baseunit list -> affect list -> cell array array
+  string -> baseunit list -> affect list -> map
