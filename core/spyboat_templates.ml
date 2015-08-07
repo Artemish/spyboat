@@ -4,28 +4,6 @@ open Core.Std
 open Yojson
 open Yojson.Basic.Util
 
-let affect_from_name affects nameobj =
-  let name = nameobj |> to_string in
-
-  let same_name affect = 
-    (String.compare name (O.get_affect_name affect) = 0)
-  in
-
-  let opt = List.find ~f:same_name affects in
-  match opt with
-  | Some(res) -> res
-  | None -> raise (Invalid_argument ("No such affect: " ^ name ^ "."))
-
-let unit_from_name units name =
-  let same_name gunit = 
-    (String.compare name (O.get_baseunit_name gunit) = 0)
-  in
-
-  let opt = List.find ~f:same_name units in
-  match opt with
-  | Some(res) -> res
-  | None -> raise (Invalid_argument ("No such affect: " ^ name ^ "."))
-
 let to_pos_list lst = 
   let make_pos el =
     let x = el |> member "x" |> to_int in
@@ -84,7 +62,8 @@ let units_from_file path affects =
     let moveRate = item |> member "moveRate" |> to_int in
     let maxSize = item |> member "maxSize" |> to_int in
     let attacks = item |> member "attacks" |> to_list in
-    let attacks = List.map ~f:(affect_from_name affects) attacks in
+    let attack_names = List.map ~f:to_string attacks in
+    let attacks = List.map ~f:(O.find_affect affects) attack_names in
     O.UnitTemplate(name, desc, attacks, maxSize, moveRate)
   in 
 
@@ -97,7 +76,7 @@ let units_from_file path affects =
 let map_from_file path units affects =
   let get_unit el = 
     let name = el |> member "name" |> to_string in
-    let baseunit = unit_from_name units name in
+    let baseunit = O.find_unit units name in
     let sectors = el |> member "sectors" |> to_list in
     let sectors = to_pos_list sectors in
     O.make_unit baseunit sectors
@@ -110,7 +89,7 @@ let map_from_file path units affects =
   let spawns = js |> member "spawn-points" |> to_list in
   let enemies = js |> member "units" |> to_list in
   let cells = js |> member "cells" |> to_list in
-  let baseCell = O.Cell(false, 1, None) in
+  let baseCell = O.Cell(false, None, None) in
   let gameCells =
     Array.make_matrix ~dimx:height ~dimy:width baseCell in
 
@@ -122,7 +101,7 @@ let map_from_file path units affects =
         | _ -> true
       in
 
-      let newcell = O.Cell(add, 1, None) in
+      let newcell = O.Cell(add, None, None) in
 
       gameCells.(i).(j) <- newcell
     in
