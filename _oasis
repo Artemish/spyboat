@@ -14,12 +14,19 @@ Library spyboat_core
   BuildTools:   ocamlbuild
   BuildDepends: threads, core, yojson
   FindLibname:  spyboat-core
-  Modules:      Spyboat_core, Spyboat_objects, Spyboat_templates
+  Modules:      Spyboat_core, Spyboat_objects, Spyboat_templates, Spyboat_logic
+
+Library client
+  Path:         clients
+  BuildTools:   ocamlbuild
+  BuildDepends: threads, core, spyboat-core
+  FindLibname:  spyboat-clients
+  Modules:      Client_console
 
 Executable test1
   Build$:       flag(examples) 
   Path:         test
   MainIs:       test.ml
   BuildTools:   ocamlbuild
-  BuildDepends: spyboat-core
+  BuildDepends: spyboat-core, spyboat-clients
   Install:      true

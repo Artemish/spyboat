@@ -1,9 +1,11 @@
 module C = Spyboat_core
 module O = Spyboat_objects
 
+module P = Client_console.Client
+
 open Core.Std
 
-let main = fun () ->
+let main () = 
   let (affects, units, map) = C.get_map () in
   let choice =
     [(6, 1), "Hack 3.0"]
@@ -14,6 +16,6 @@ let main = fun () ->
   in
 
   let b = C.initialize_map affects units map choice in
-  b
+  P.get_move b
 
-let b = main ()
+let bs = main ()

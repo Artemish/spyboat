@@ -4,6 +4,10 @@ EXAMPLES_FLAG=--enable-examples
 
 J=6
 
+resetup: clean
+	oasis setup-clean && \
+	  oasis setup
+
 setup.data: setup.ml
 	ocaml setup.ml -configure \
 		$(EXAMPLES_FLAG) \
