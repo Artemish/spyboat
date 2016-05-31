@@ -9,15 +9,14 @@ let get_map () =
   let map = T.map_from_file "res/demo-level.json" units affects in
   (affects, units, map)
 
-let initialize_map affects units map unit_selection = 
+let initialize_board affects units map unit_selection = 
   let O.Map(width, height, cell_arr, starting_pos, enemies) = map in
 
   let to_unitstate: (O.position * string) -> O.unitstate =
     fun (pos, unit_name) ->
       let () =
         match (List.mem starting_pos pos) with
-        | false -> print_string "Hello!\n";
-                   raise (Invalid_argument("No position"))
+        | false -> raise (Invalid_argument("No position"))
         | true -> ()
       in
       
@@ -27,7 +26,28 @@ let initialize_map affects units map unit_selection =
   in
 
   let player_units = List.map ~f:to_unitstate unit_selection in
+  (* TODO check starting position duplicates *)
 
-  (* TODO populate cells with unit IDs, mirror structures *)
+  let update_arr units =
+    let register_position uid (x, y) =
+      let row = Array.get cell_arr y in
+      let O.Cell(passable, _, credit) = Array.get row x in
+      let newcell = O.Cell(passable, Some(uid), credit) in
+      cell_arr.(y).(x) <- newcell
+    in
 
-  O.Board(width, height, cell_arr, player_units, enemies)
+    let register_unit (O.Boat(_, uid, sectors, _, _, _)) = 
+      List.iter ~f:(register_position uid) sectors
+    in
+
+    List.iter ~f:register_unit player_units;
+    List.iter ~f:register_unit enemies
+  in
+
+
+  let () = update_arr units in
+
+  (* TODO check empty *)
+  let start :: _ = player_units in 
+
+  O.Board(width, height, cell_arr, player_units, enemies, start)

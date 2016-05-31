@@ -35,10 +35,11 @@ type map =
 
 (* Width, height, 2d array of cells, player units, enemy units *)
 type boardstate =
-  Board of (int * int * cell array array * unitstate list * unitstate list)
+  Board of (int * int * cell array array * unitstate list * unitstate list * unitstate)
 
 val get_affect_name : affect -> string
 val find_affect : affect list -> string -> affect
 val get_baseunit_name : baseunit -> string
 val make_unit : baseunit -> position list -> unitstate
 val find_unit : baseunit list -> string -> baseunit
+val char_of_uuid : uuid -> char
