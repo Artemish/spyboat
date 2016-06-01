@@ -36,7 +36,7 @@ let initialize_board affects units map unit_selection =
       cell_arr.(y).(x) <- newcell
     in
 
-    let register_unit (O.Boat(_, uid, sectors, _, _, _)) = 
+    let register_unit (O.Boat(_, uid, sectors, _, _)) = 
       List.iter ~f:(register_position uid) sectors
     in
 

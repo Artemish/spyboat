@@ -26,6 +26,8 @@ module Client = struct
 
     let mark_row y row = 
       let mark_cell x (O.Cell(passable, uid_opt, cred_opt)) = 
+        if (not passable) then parr.(2*y+1).(2*x+1) <- 'X'; 
+
         match uid_opt with
           None -> ()
         | Some(uuid) -> parr.(2*y+1).(2*x+1) <- O.char_of_uuid uuid;
@@ -33,8 +35,6 @@ module Client = struct
         match (cred_opt) with
           None -> ()
         | Some(_) -> parr.(2*y+1).(2*x+1) <- '$';
-
-        if (not passable) then parr.(2*y+1).(2*x+1) <- 'X'
       in
 
       Array.iteri ~f:mark_cell row
@@ -48,9 +48,20 @@ module Client = struct
 
     Array.iter ~f:print_row parr 
 
+  let print_unit (O.Boat(base, uid, _, max, move)) =
+    let O.UnitTemplate(name, descr, affects, _, _) = base in
+
+    Printf.printf "%s (%c): Max Size %d, move rate %d\n%s\n"
+        name (O.char_of_uuid uid) max move descr;
+    let affect_string = (String.concat ~sep:"\n\t" (List.map ~f:O.string_of_affect affects)) in
+    Printf.printf "Affects:\n\t%s\n" affect_string
+
   let get_move b =
     let O.Board(_,_,_,_,_, current_unit) = b in
     let () = print_board b in
+    let () = print_unit current_unit in
+    let c = String.get 0 (read_line ()) in
+    match c with 
     L.EndTurn
 
 end

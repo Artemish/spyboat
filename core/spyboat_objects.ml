@@ -21,7 +21,7 @@ and position = (int * int)
 
 and unitstate =
   (* Template, sector list, max size, move rate, active *)
-  Boat of (baseunit * uuid * position list * int * int * bool)
+  Boat of (baseunit * uuid * position list * int * int)
 
 and cell = 
   Cell of (bool * uuid option * credit option)
@@ -46,11 +46,14 @@ let get_baseunit_name baseunit =
 
 let nextUUID = ref 0
 
+let string_of_affect (Affect(name, desc, _, _, _, _)) =
+  name ^ ": " ^ desc
+
 let make_unit baseunit sectors =
   let UnitTemplate(_, _, _, maxsize, moverate) = baseunit in
   let uuid = UUID(!nextUUID) in
   let () = incr nextUUID in
-  Boat(baseunit, uuid, sectors, maxsize, moverate, false)
+  Boat(baseunit, uuid, sectors, maxsize, moverate)
 
 let find_unit units name =
   let same_name gunit =

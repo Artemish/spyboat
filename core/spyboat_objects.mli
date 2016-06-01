@@ -23,8 +23,8 @@ type baseunit =
     UnitTemplate of (string * string * affect list * int * int)
 
 type unitstate =
-  (* Template, sector list, max size, move rate, active *)
-  Boat of (baseunit * uuid * position list * int * int * bool)
+  (* Template, sector list, max size, move rate *)
+  Boat of (baseunit * uuid * position list * int * int)
 
 type cell = 
   Cell of (bool * uuid option * credit option)
@@ -43,3 +43,4 @@ val get_baseunit_name : baseunit -> string
 val make_unit : baseunit -> position list -> unitstate
 val find_unit : baseunit list -> string -> baseunit
 val char_of_uuid : uuid -> char
+val string_of_affect : affect -> string
