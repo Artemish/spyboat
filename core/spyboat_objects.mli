@@ -23,8 +23,8 @@ type baseunit =
     UnitTemplate of (string * string * affect list * int * int)
 
 type unitstate =
-  (* Template, sector list, max size, move rate *)
-  Boat of (baseunit * uuid * position list * int * int)
+  (* Template, uid, head position, sector list, max size, move rate *)
+  Boat of (baseunit * uuid * position * position list * int * int)
 
 type cell = 
   Cell of (bool * uuid option * credit option)
@@ -35,7 +35,7 @@ type map =
 
 (* Width, height, 2d array of cells, player units, enemy units *)
 type boardstate =
-  Board of (int * int * cell array array * unitstate list * unitstate list * unitstate)
+  Board of (int * int * cell array array * unitstate list * unitstate list)
 
 val get_affect_name : affect -> string
 val find_affect : affect list -> string -> affect

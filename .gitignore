@@ -5,3 +5,7 @@
 *.mldylib
 *.mllib
 *.sw*
+setup.ml
+setup.log
+setup.data
+myocamlbuild.ml

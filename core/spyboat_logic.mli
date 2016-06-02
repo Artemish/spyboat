@@ -1,11 +1,11 @@
 module O = Spyboat_objects
 
+type direction = LEFT | RIGHT | UP | DOWN
+
 (*  Update board according to player action; side-effecty *)
 type action =
-  | Attack of (O.unitstate * O.affect * O.position)
-  | Step of (O.unitstate * O.position)
-  | Retire of O.unitstate
-  | EndTurn
+  | Attack of (O.affect * O.position)
+  | Step of direction
 
 type action_error =
   (* Couldn't find the corresponding UID *)
@@ -20,7 +20,7 @@ type action_error =
   | NotYourTurn
 
 type response =
-  | Good
+  | Good of O.boardstate
   | Bad of action_error
 
-val apply_action : O.boardstate -> action -> response
+val apply_action : O.boardstate -> O.unitstate -> action -> bool -> response

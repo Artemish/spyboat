@@ -20,8 +20,8 @@ and affecttype =
 and position = (int * int)
 
 and unitstate =
-  (* Template, sector list, max size, move rate, active *)
-  Boat of (baseunit * uuid * position list * int * int)
+  (* Template, uid, head position, sector list, max size, move rate, active *)
+  Boat of (baseunit * uuid * position * position list * int * int)
 
 and cell = 
   Cell of (bool * uuid option * credit option)
@@ -33,7 +33,7 @@ and map =
   Map of (int * int * cell array array * position list * unitstate list)
 
 and boardstate =
-  Board of (int * int * cell array array * unitstate list * unitstate list * unitstate)
+  Board of (int * int * cell array array * unitstate list * unitstate list)
 
 
 let get_affect_name affect = 
@@ -50,10 +50,11 @@ let string_of_affect (Affect(name, desc, _, _, _, _)) =
   name ^ ": " ^ desc
 
 let make_unit baseunit sectors =
+  (* Invariant, sectors is never empty *)
   let UnitTemplate(_, _, _, maxsize, moverate) = baseunit in
   let uuid = UUID(!nextUUID) in
   let () = incr nextUUID in
-  Boat(baseunit, uuid, sectors, maxsize, moverate)
+  Boat(baseunit, uuid, List.hd_exn sectors, sectors, maxsize, moverate)
 
 let find_unit units name =
   let same_name gunit =
@@ -69,7 +70,7 @@ let find_affect affects name =
     (String.compare name (get_affect_name gaffect) = 0)
   in
 
-  match (List.find ~f:same_name affects) with
+  match (List.find ~f:(fun x -> get_affect_name x = name) affects) with
   | Some res -> res
   | None -> raise (Invalid_argument("No such affect: " ^ name ^ "."))
 

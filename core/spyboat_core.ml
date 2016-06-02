@@ -36,7 +36,7 @@ let initialize_board affects units map unit_selection =
       cell_arr.(y).(x) <- newcell
     in
 
-    let register_unit (O.Boat(_, uid, sectors, _, _)) = 
+    let register_unit (O.Boat(_, uid, _, sectors, _, _)) = 
       List.iter ~f:(register_position uid) sectors
     in
 
@@ -50,4 +50,4 @@ let initialize_board affects units map unit_selection =
   (* TODO check empty *)
   let start :: _ = player_units in 
 
-  O.Board(width, height, cell_arr, player_units, enemies, start)
+  O.Board(width, height, cell_arr, player_units, enemies)

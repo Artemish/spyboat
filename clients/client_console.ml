@@ -5,7 +5,7 @@ open Core.Std
 
 module Client = struct
   let print_board b = 
-    let O.Board(width, height, cells, player_units, enemy_units, _) = b in
+    let O.Board(width, height, cells, player_units, enemy_units) = b in
 
     let print_height = height * 2 + 1 in
     let print_width = width * 2 + 1 in
@@ -48,20 +48,27 @@ module Client = struct
 
     Array.iter ~f:print_row parr 
 
-  let print_unit (O.Boat(base, uid, _, max, move)) =
+  let print_unit (O.Boat(base, uid, (p_x, p_y), _, max, move)) =
     let O.UnitTemplate(name, descr, affects, _, _) = base in
 
-    Printf.printf "%s (%c): Max Size %d, move rate %d\n%s\n"
-        name (O.char_of_uuid uid) max move descr;
+    Printf.printf "%s id: %c pos: (%d, %d): Max Size %d, move rate %d\n%s\n"
+        name (O.char_of_uuid uid) p_x p_y max move descr;
     let affect_string = (String.concat ~sep:"\n\t" (List.map ~f:O.string_of_affect affects)) in
     Printf.printf "Affects:\n\t%s\n" affect_string
 
-  let get_move b =
-    let O.Board(_,_,_,_,_, current_unit) = b in
+  let get_move b boat =
     let () = print_board b in
-    let () = print_unit current_unit in
-    let c = String.get 0 (read_line ()) in
-    match c with 
-    L.EndTurn
+    let () = print_unit boat in
+    let c = String.get (read_line ()) 0 in
+    let a =
+      match c with 
+      | '^' -> L.UP
+      | 'v' -> L.DOWN
+      | '<' -> L.LEFT
+      | '>' -> L.RIGHT
+      | _ -> L.DOWN
+    in
+
+    L.Step(a)
 
 end
