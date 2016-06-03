@@ -99,8 +99,8 @@ let handle_step boat board dir is_player =
           then Bad(BadPosition(newpos, "Can't move into another unit"))
           else 
             (* replace sector *)
-            let filter_head = List.filter ~f:((<>) head) sectors in
-            let new_sectors = newpos :: filter_head in
+            let filter_newpos = List.filter ~f:((<>) newpos) sectors in
+            let new_sectors = newpos :: filter_newpos in
             let new_unitstate = 
               O.Boat(base, actor_uid, newpos, new_sectors, maxsize, moverate)
             in
