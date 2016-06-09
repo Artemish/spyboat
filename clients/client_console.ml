@@ -1,5 +1,5 @@
 module O = Spyboat_objects 
-module L = Spyboat_logic
+module L = Board_logic
 
 open Core.Std
 
@@ -60,15 +60,16 @@ module Client = struct
     let () = print_board b in
     let () = print_unit boat in
     let c = String.get (read_line ()) 0 in
-    let a =
-      match c with 
-      | '^' -> L.UP
-      | 'v' -> L.DOWN
-      | '<' -> L.LEFT
-      | '>' -> L.RIGHT
-      | _ -> L.DOWN
-    in
 
-    L.Step(a)
+    match c with 
+    | '^' -> L.BoardAction(L.Step(L.UP))
+    | 'v' -> L.BoardAction(L.Step(L.DOWN))
+    | '<' -> L.BoardAction(L.Step(L.LEFT))
+    | '>' -> L.BoardAction(L.Step(L.RIGHT))
+
+    (* TODO figure out a resonable abstraction for undoing *)
+    | 'u' -> L.BoardAction(L.Undo(L.HeadCut(None)))
+
+    | _ -> L.BoardAction(L.Step(L.DOWN))
 
 end
