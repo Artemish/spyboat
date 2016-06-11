@@ -48,7 +48,7 @@ module Client = struct
 
     Array.iter ~f:print_row parr 
 
-  let print_unit (O.Boat(base, uid, (p_x, p_y), _, max, move)) =
+  let print_unit (O.Boat(base, _, uid, (p_x, p_y), _, max, move)) =
     let O.UnitTemplate(name, descr, affects, _, _) = base in
 
     Printf.printf "%s id: %c pos: (%d, %d): Max Size %d, move rate %d\n%s\n"

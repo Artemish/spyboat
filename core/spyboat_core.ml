@@ -22,7 +22,8 @@ let initialize_board affects units map unit_selection =
       
       let base_unit = O.find_unit units unit_name in
 
-      O.make_unit base_unit [pos]
+      (* TODO treat this properly *)
+      O.make_unit base_unit [pos] O.Player
   in
 
   let player_units = List.map ~f:to_unitstate unit_selection in
@@ -36,7 +37,7 @@ let initialize_board affects units map unit_selection =
       cell_arr.(y).(x) <- newcell
     in
 
-    let register_unit (O.Boat(_, uid, _, sectors, _, _)) = 
+    let register_unit (O.Boat(_, _, uid, _, sectors, _, _)) = 
       List.iter ~f:(register_position uid) sectors
     in
 

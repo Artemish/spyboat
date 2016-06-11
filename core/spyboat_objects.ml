@@ -3,6 +3,11 @@ open Core.Std
 type uuid =
   UUID of int
 
+(* TODO use real IDs *)
+type player_id = 
+  | Player
+  | Enemy
+
 type baseunit =
   (* Name, description, affects, base size, base moverate *)
   UnitTemplate of (string * string * affect list * int * int)
@@ -21,7 +26,7 @@ and position = (int * int)
 
 and unitstate =
   (* Template, uid, head position, sector list, max size, move rate, active *)
-  Boat of (baseunit * uuid * position * position list * int * int)
+  Boat of (baseunit * player_id * uuid * position * position list * int * int)
 
 and cell = 
   Cell of (bool * uuid option * credit option)
@@ -49,12 +54,12 @@ let nextUUID = ref 0
 let string_of_affect (Affect(name, desc, _, _, _, _)) =
   name ^ ": " ^ desc
 
-let make_unit baseunit sectors =
+let make_unit baseunit sectors player_id =
   (* Invariant, sectors is never empty *)
   let UnitTemplate(_, _, _, maxsize, moverate) = baseunit in
   let uuid = UUID(!nextUUID) in
   let () = incr nextUUID in
-  Boat(baseunit, uuid, List.hd_exn sectors, sectors, maxsize, moverate)
+  Boat(baseunit, player_id, uuid, List.hd_exn sectors, sectors, maxsize, moverate)
 
 let find_unit units name =
   let same_name gunit =

@@ -38,17 +38,18 @@ type response =
 
 (* TODO generalize to N players... big todo lol *)
 (* {{{ Update unit in board *)
-let update_unit_in_board boat board is_player = 
+let update_unit_in_board boat board = 
   let O.Board(width, height, cells, player_units, enemy_units) = board in
-  let O.Boat(_, uid, _, _, _, _) = boat in
-  let baselist = if is_player then player_units else enemy_units in
+  let O.Boat(_, player_id, uid, _, _, _, _) = boat in
+  let baselist = if player_id = O.Player then player_units else enemy_units in
   let switcher =
     (fun b ->
-      let O.Boat(_, uid', _, _, _, _) = b in
+      let O.Boat(_, _, uid', _, _, _, _) = b in
       if (uid' = uid) then boat else b)
   in
   let newlist = List.map ~f:switcher baselist in
-  if is_player
+
+  if player_id = O.Player
   then O.Board(width, height, cells, newlist, enemy_units)
   else O.Board(width, height, cells, player_units, newlist)
 (* }}} *)
@@ -66,9 +67,9 @@ let rec cut_last lst =
 
 (* TODO do away with player vs. enemy and add player IDs *)
 (* {{{ Handle step *)
-let handle_step boat board dir is_player = 
+let handle_step boat board dir = 
   let O.Board(width, height, cells, player_units, enemy_units) = board in
-  let O.Boat(base, actor_uid, head, sectors, maxsize, moverate) = boat in
+  let O.Boat(base, player_id, actor_uid, head, sectors, maxsize, moverate) = boat in
   let (pos_x, pos_y) = head in
   let (newpos_x, newpos_y) as newpos = 
     (match dir with
@@ -102,19 +103,19 @@ let handle_step boat board dir is_player =
                * unit is still on it *)
               let () = cells.(old_y).(old_x) <- O.Cell(old_passable, None, None) in
 
-              let boat = O.Boat(base, actor_uid, newpos, newpos :: remaining, maxsize, moverate) in
+              let boat = O.Boat(base, player_id, actor_uid, newpos, newpos :: remaining, maxsize, moverate) in
               let undo = Some(TailAdd((old_x, old_y), credit_opt)) in
               boat, undo
 
             else 
-              let boat = O.Boat(base, actor_uid, newpos, newpos :: sectors, maxsize, moverate) in
+              let boat = O.Boat(base, player_id, actor_uid, newpos, newpos :: sectors, maxsize, moverate) in
               let undo = Some(HeadCut(credit_opt)) in
               boat, undo
           in
 
           let () = cells.(newpos_y).(newpos_x) <- O.Cell(passable, Some(actor_uid), None) in
 
-          let new_board = update_unit_in_board new_unitstate board is_player in
+          let new_board = update_unit_in_board new_unitstate board in
           Good(new_board, undo_information)
 
       | Some(target_uid) ->
@@ -126,18 +127,18 @@ let handle_step boat board dir is_player =
             let filter_newpos = List.filter ~f:((<>) newpos) sectors in
             let new_sectors = newpos :: filter_newpos in
             let new_unitstate = 
-              O.Boat(base, actor_uid, newpos, new_sectors, maxsize, moverate)
+              O.Boat(base, player_id, actor_uid, newpos, new_sectors, maxsize, moverate)
             in
 
-            let new_board = update_unit_in_board new_unitstate board is_player in
+            let new_board = update_unit_in_board new_unitstate board in
             let undo_information = Some(RefitHead(sectors)) in
             Good(new_board, undo_information)
 (* }}} *)
 
 (* {{{ Handle undo *)
-let handle_undo undo_info board boat is_player =
+let handle_undo undo_info board boat =
   let O.Board(width, height, cells, player_units, enemy_units) = board in
-  let O.Boat(base, uid, (h_x, h_y), sectors, maxsize, moverate) = boat in
+  let O.Boat(base, player_id, uid, (h_x, h_y), sectors, maxsize, moverate) = boat in
   let new_unit =
     match undo_info with
     | TailAdd((r_x, r_y), credit_opt) ->
@@ -151,27 +152,27 @@ let handle_undo undo_info board boat is_player =
         let () = cells.(r_y).(r_x) <- O.Cell(r_passable, Some(uid), None) in
         let () = cells.(h_y).(h_x) <- O.Cell(h_passable, None, None) in
 
-        O.Boat(base, uid, new_head, new_sectors, maxsize, moverate)
+        O.Boat(base, player_id, uid, new_head, new_sectors, maxsize, moverate)
 
     | HeadCut(credit_opt) ->
         let _ :: remaining = sectors in
         let new_head = List.hd_exn remaining in
         let O.Cell(h_passable, _, _) = cells.(h_y).(h_x) in
         let () = cells.(h_y).(h_x) <- O.Cell(h_passable, None, credit_opt) in
-        O.Boat(base, uid, new_head, remaining, maxsize, moverate)
+        O.Boat(base, player_id, uid, new_head, remaining, maxsize, moverate)
     | RefitHead(previous_sectors) ->
         (* No cells need updating, sectors were merely shuffled *)
         let new_head = List.hd_exn previous_sectors in
-        O.Boat(base, uid, new_head, previous_sectors, maxsize, moverate)
+        O.Boat(base, player_id, uid, new_head, previous_sectors, maxsize, moverate)
   in
 
-  let new_board = update_unit_in_board new_unit board is_player in
+  let new_board = update_unit_in_board new_unit board in
   Good(new_board, None)
 (* }}} *)
 
-let apply_action board boat action is_player =
+let apply_action board boat action =
   match action with
   | Step(dir) ->
-      handle_step boat board dir is_player
-  | Undo(undo_info) -> handle_undo undo_info board boat is_player
+      handle_step boat board dir 
+  | Undo(undo_info) -> handle_undo undo_info board boat 
   | _ -> Bad(NotYourTurn)

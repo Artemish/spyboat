@@ -79,7 +79,8 @@ let map_from_file path units affects =
     let baseunit = O.find_unit units name in
     let sectors = el |> member "sectors" |> to_list in
     let sectors = to_pos_list sectors in
-    O.make_unit baseunit sectors
+    (* TODO treat this properly *)
+    O.make_unit baseunit sectors O.Enemy
   in
 
   let buf = In_channel.read_all path in

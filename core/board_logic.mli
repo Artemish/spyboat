@@ -37,4 +37,4 @@ type response =
   | Good of O.boardstate * undo_information option
   | Bad of action_error
 
-val apply_action : O.boardstate -> O.unitstate -> board_action -> bool -> response
+val apply_action : O.boardstate -> O.unitstate -> board_action -> response

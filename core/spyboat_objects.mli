@@ -3,6 +3,11 @@ open Core.Std
 type uuid =
   UUID of int
 
+(* TODO use real IDs *)
+type player_id = 
+  | Player
+  | Enemy
+
 type affecttype = 
   | HEALTH of int
   | FLOOR of bool
@@ -24,7 +29,7 @@ type baseunit =
 
 type unitstate =
   (* Template, uid, head position, sector list, max size, move rate *)
-  Boat of (baseunit * uuid * position * position list * int * int)
+  Boat of (baseunit * player_id * uuid * position * position list * int * int)
 
 type cell = 
   Cell of (bool * uuid option * credit option)
@@ -40,7 +45,7 @@ type boardstate =
 val get_affect_name : affect -> string
 val find_affect : affect list -> string -> affect
 val get_baseunit_name : baseunit -> string
-val make_unit : baseunit -> position list -> unitstate
+val make_unit : baseunit -> position list -> player_id -> unitstate
 val find_unit : baseunit list -> string -> baseunit
 val char_of_uuid : uuid -> char
 val string_of_affect : affect -> string

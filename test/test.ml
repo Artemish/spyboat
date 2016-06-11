@@ -20,7 +20,7 @@ let rec game_step board undostack =
 
   match translated_action with
   | L.BoardAction(baction) ->
-    (match L.apply_action board start baction true with
+    (match L.apply_action board start baction with
     | L.Good(new_bstate, undo_opt) ->
         let new_undostack =
           (match undo_opt with
