@@ -9,7 +9,8 @@ type player_id =
   | Enemy
 
 type affecttype = 
-  | HEALTH of int
+  | DAMAGE of int
+  | HEALING of int
   | FLOOR of bool
   | STEPCAP of int
   | SIZECAP of int

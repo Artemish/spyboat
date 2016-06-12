@@ -170,9 +170,41 @@ let handle_undo undo_info board boat =
   Good(new_board, None)
 (* }}} *)
 
+let unit_lookup uid_opt board = 
+  let O.Board(_,_,_,player_units,enemy_units) = board in
+  match uid_opt with
+  | None -> None
+  | Some(uid) -> 
+      let same_name (O.Boat(_,_,uid',_,_,_,_)) = uid' = uid in
+      (match List.find ~f:same_name player_units with
+      | Some(boat) -> Some(boat)
+      | None ->
+          (match List.find ~f:same_name player_units with
+          | Some(boat) -> Some(boat)
+          | None -> None))
+
+let handle_attack board boat affect (t_x, t_y) = 
+  let O.Board(width, height, cells, player_units, enemy_units) = board in
+  (* TODO Handle nonexistent affect? *)
+  let O.Boat(_, player_id, uid, (h_x, h_y), sectors, _, _) = boat in
+  let O.Affect(_, _, atype, sizecost, reqsize, range) = affect in
+
+  if not (within_bounds (t_x, t_y) board) 
+  then Bad(BadPosition((t_x, t_y), "Off the map"))
+  else
+    let O.Cell(passable, uid_opt, credit_opt) = cells.(t_y).(t_x) in
+    let boat_opt = unit_lookup uid_opt board in
+    match (atype, boat_opt) with
+    | (O.FLOOR(new_passability), _) ->
+        let new_cell = O.Cell(new_passability, uid_opt, credit_opt) in
+        let () = cells.(t_y).(t_x) <- new_cell in
+        Good(board, None)
+    
+
 let apply_action board boat action =
   match action with
   | Step(dir) ->
       handle_step boat board dir 
   | Undo(undo_info) -> handle_undo undo_info board boat 
+  | Attack(affect, target) -> handle_attack board boat affect target 
   | _ -> Bad(NotYourTurn)

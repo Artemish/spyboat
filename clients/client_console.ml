@@ -59,6 +59,7 @@ module Client = struct
   let get_move b boat =
     let () = print_board b in
     let () = print_unit boat in
+    let O.Boat(O.UnitTemplate(_,_,affects,_,_), _, _, (h_x, h_y), _, _, _) = boat in
     let c = String.get (read_line ()) 0 in
 
     match c with 
@@ -69,7 +70,14 @@ module Client = struct
 
     (* TODO figure out a resonable abstraction for undoing *)
     | 'u' -> L.BoardAction(L.Undo(L.HeadCut(None)))
-
+    | 'a' ->
+        begin
+          let input = read_line () in
+          Scanf.sscanf input "%d %d %d" (fun aid d_x d_y ->
+            let affect = List.nth_exn affects aid in
+            let target = h_x + d_x, h_y + d_y in
+            L.BoardAction(L.Attack(affect, target)))
+        end
     | _ -> L.BoardAction(L.Step(L.DOWN))
 
 end

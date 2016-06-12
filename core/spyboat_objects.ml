@@ -17,7 +17,8 @@ and affect =
   Affect of (string * string * affecttype * int * int * int)
 
 and affecttype = 
-    HEALTH of int
+  | DAMAGE of int
+  | HEALING of int
   | FLOOR of bool
   | STEPCAP of int
   | SIZECAP of int

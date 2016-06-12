@@ -3,7 +3,7 @@
   {
     "name": "DATASLAM",
     "description": "SIZE REQ:6, DELETES 8 SECTORS FROM TARGET",
-    "type": "health",
+    "type": "damage",
     "range": 1,
     "magnitude": 8,
     "requiredSize": 6,
@@ -11,7 +11,7 @@
   }, {
     "name": "PONG",
     "description": "RANGE:5, DELETES 2 SECTORS FROM TARGET",
-    "type": "health",
+    "type": "damage",
     "range": 5,
     "magnitude": 2,
     "requiredSize": 0,
@@ -19,7 +19,7 @@
   }, {
     "name": "BURN",
     "description": "DELETES 1 SECTOR FROM TARGET",
-    "type": "health",
+    "type": "damage",
     "range": 1,
     "magnitude": 1,
     "requiredSize": 0,
@@ -27,7 +27,7 @@
   }, {
     "name": "BYTE",
     "description": "DELETES 2 SECTORS FROM TARGET",
-    "type": "health",
+    "type": "damage",
     "range": 1,
     "magnitude": 2,
     "requiredSize": 0,
@@ -35,15 +35,39 @@
   }, {
     "name": "SLICE",
     "description": "DELETES 2 SECTORS FROM TARGET",
-    "type": "health",
+    "type": "damage",
     "range": 1,
     "magnitude": 2,
     "requiredSize": 0,
     "cost": 0
   }, {
+    "name": "hypo",
+    "description": "heals 3 sectors of a unit",
+    "type": "health",
+    "range": 1,
+    "magnitude": 3,
+    "requiredSize": 0,
+    "cost": 0
+  }, {
+    "name": "floor_break",
+    "description": "Breaks the floor",
+    "type": "floor",
+    "range": 1,
+    "magnitude": 0,
+    "requiredSize": 0,
+    "cost": 0
+  }, {
+    "name": "floor_repair",
+    "description": "Breaks the floor",
+    "type": "floor",
+    "range": 1,
+    "magnitude": 1,
+    "requiredSize": 0,
+    "cost": 0
+  }, {
     "name": "MUTILATE",
     "description": "DELETES 4 SECTORS FROM TARGET",
-    "type": "health",
+    "type": "damage",
     "range": 1,
     "magnitude": 4,
     "requiredSize": 4,

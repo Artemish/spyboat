@@ -13,12 +13,14 @@ let to_pos_list lst =
   List.map ~f:make_pos lst
 
 let affects_from_file path =
-
   let get_affect_type name magnitude =
-    if ((String.compare name "health") = 0) then
-      O.HEALTH(magnitude)
+    if (name = "damage") then
+      O.DAMAGE(magnitude)
 
-    else if ((String.compare name "floor") = 0) then
+    else if (name = "health") then
+      O.HEALING(magnitude)
+
+    else if (name = "floor") then
       let floor =
         match magnitude with
       | 0 -> false
@@ -27,10 +29,10 @@ let affects_from_file path =
 
       O.FLOOR(floor)
 
-    else if ((String.compare name "stepcap") = 0) then
+    else if (name = "stepcap") then
       O.STEPCAP(magnitude)
 
-    else if ((String.compare name "sizecap") = 0) then
+    else if (name = "sizecap") then
       O.SIZECAP(magnitude)
 
     else

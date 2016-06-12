@@ -7,7 +7,10 @@
     "maxSize": 4,
     "attacks": [
       "SLICE",
-      "MUTILATE"
+      "MUTILATE",
+      "hypo",
+      "floor_break",
+      "floor_repair"
     ]
   }, {
     "name": "Guard Dog",
