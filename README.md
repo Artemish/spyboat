@@ -6,4 +6,4 @@ now in OCaml
 
 thx lego
 
-![current progress](/res/screen.jpg)
+![current progress](/res/demo.gif)
