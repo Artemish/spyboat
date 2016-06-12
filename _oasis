@@ -19,7 +19,7 @@ Library spyboat_core
 Library client
   Path:         clients
   BuildTools:   ocamlbuild
-  BuildDepends: threads, core, spyboat-core
+  BuildDepends: threads, core, spyboat-core, ANSITerminal
   FindLibname:  spyboat-clients
   Modules:      Client_console
 

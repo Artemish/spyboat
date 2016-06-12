@@ -1,5 +1,6 @@
 module O = Spyboat_objects 
 module L = Board_logic
+module T = ANSITerminal
 
 open Core.Std
 
@@ -57,8 +58,10 @@ module Client = struct
     Printf.printf "Affects:\n\t%s\n" affect_string
 
   let get_move b boat =
+    let () = T.erase T.Screen; T.move_cursor 0 (-100) in
     let () = print_board b in
     let () = print_unit boat in
+    let () = print_string "move> " in
     let O.Boat(O.UnitTemplate(_,_,affects,_,_), _, _, (h_x, h_y), _, _, _) = boat in
     let c = String.get (read_line ()) 0 in
 
