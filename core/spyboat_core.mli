@@ -1,10 +1,12 @@
-val get_map: unit ->
-             (Spyboat_objects.affect list *
-              Spyboat_objects.baseunit list *
-              Spyboat_objects.map)
+module O = Spyboat_objects 
 
-val initialize_board: Spyboat_objects.affect list ->
-                      Spyboat_objects.baseunit list -> 
-                      Spyboat_objects.map ->
-                     (Spyboat_objects.position * string) list ->
-                      Spyboat_objects.boardstate
+val get_map: unit ->
+             (O.Affect.t list *
+              O.UnitTemplate.t list *
+              O.Map.t)
+
+val initialize_board: affects: O.Affect.t list ->
+                      templates: O.UnitTemplate.t list -> 
+                      map: O.Map.t ->
+                      choices: (O.position * string) list ->
+                      O.BoardState.t

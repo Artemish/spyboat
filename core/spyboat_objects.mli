@@ -1,52 +1,93 @@
 open Core.Std
 
-type uuid =
-  UUID of int
+type unit_id = UID of int
 
 (* TODO use real IDs *)
 type player_id = 
   | Player
   | Enemy
 
-type affecttype = 
-  | DAMAGE of int
-  | HEALING of int
-  | FLOOR of bool
-  | STEPCAP of int
-  | SIZECAP of int
-
-type credit =
-  Credit of int
-
 type position = (int * int)
+type credit = Credit of int
 
-type affect =
-    (* Name, description, affect type, cost, required size, range*)
-    Affect of (string * string * affecttype * int * int * int)
+module Affect : sig
+  type affecttype = 
+    | DAMAGE of int
+    | HEALING of int
+    | FLOOR of bool
+    | STEPCAP of int
+    | SIZECAP of int
 
-type baseunit =
-    (* Name, description, affects, base size, base moverate *)
-    UnitTemplate of (string * string * affect list * int * int)
+  type t = {
+    name: string;
+    descr: string;
+    atype: affecttype;
+    cost: int;
+    reqsize: int;
+    range: int;
+  } [@@deriving fields]
+end
 
-type unitstate =
-  (* Template, uid, head position, sector list, max size, move rate *)
-  Boat of (baseunit * player_id * uuid * position * position list * int * int)
+module UnitTemplate : sig
+  type t = {
+    name: string;
+    descr: string;
+    affects: Affect.t list;
+    base_size: int;
+    base_move: int;
+  } [@@deriving fields]
+end
 
-type cell = 
-  Cell of (bool * uuid option * credit option)
+module UnitState : sig 
+  type t = {
+    template: UnitTemplate.t;
+    pid: player_id;
+    uid: unit_id;
+    head: position;
+    sectors: position list;
+    max_size: int;
+    move_rate: int;
+  } [@@deriving fields]
 
-(* Width, height, 2d array of cells, starting positions, enemies *)
-type map =
-  Map of (int * int * cell array array * position list * unitstate list)
+  val create : template:UnitTemplate.t -> sectors:(position list) -> pid:player_id -> t
+end 
 
-(* Width, height, 2d array of cells, player units, enemy units *)
-type boardstate =
-  Board of (int * int * cell array array * unitstate list * unitstate list)
+module Cell : sig 
+  type t = {
+    passable: bool;
+    uid_opt: unit_id option;
+    credit_opt: credit option;
+  } [@@deriving fields]
+end
+  
+module Map : sig 
+  type t = {
+    width: int;
+    height: int;
+    cells: Cell.t array array;
+    starts: position list;
+    enemy_units: UnitState.t list;
+  } [@@deriving fields]
+end
 
-val get_affect_name : affect -> string
-val find_affect : affect list -> string -> affect
-val get_baseunit_name : baseunit -> string
-val make_unit : baseunit -> position list -> player_id -> unitstate
-val find_unit : baseunit list -> string -> baseunit
-val char_of_uuid : uuid -> char
-val string_of_affect : affect -> string
+module BoardState : sig 
+  type t = {
+    width: int;
+    height: int;
+    cells: Cell.t array array;
+    player_units: UnitState.t list;
+    enemy_units: UnitState.t list;
+  } [@@deriving fields]
+end
+
+val get_affect_name : Affect.t -> string
+
+val get_baseunit_name : UnitTemplate.t -> string
+
+val string_of_affect : Affect.t -> string
+
+val find_unit : UnitState.t list -> string -> UnitState.t
+
+val find_affect : Affect.t list -> string -> Affect.t
+
+val char_of_uuid : unit_id -> char

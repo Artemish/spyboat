@@ -1,66 +1,98 @@
 open Core.Std
 
-type uuid =
-  UUID of int
+type unit_id = UID of int
 
 (* TODO use real IDs *)
 type player_id = 
   | Player
   | Enemy
 
-type baseunit =
-  (* Name, description, affects, base size, base moverate *)
-  UnitTemplate of (string * string * affect list * int * int)
+type position = (int * int)
+type credit = Credit of int
 
-and affect =
-  (* Name, description, affect type, cost, required size, range*)
-  Affect of (string * string * affecttype * int * int * int)
+module Affect = struct
+  type affecttype = 
+    | DAMAGE of int
+    | HEALING of int
+    | FLOOR of bool
+    | STEPCAP of int
+    | SIZECAP of int
 
-and affecttype = 
-  | DAMAGE of int
-  | HEALING of int
-  | FLOOR of bool
-  | STEPCAP of int
-  | SIZECAP of int
+  type t = {
+    name: string;
+    descr: string;
+    atype: affecttype;
+    cost: int;
+    reqsize: int;
+    range: int;
+  } [@@deriving fields]
+end
 
-and position = (int * int)
+module UnitTemplate = struct
+  type t = {
+    name: string;
+    descr: string;
+    affects: Affect.t list;
+    base_size: int;
+    base_move: int;
+  } [@@deriving fields]
+end
 
-and unitstate =
-  (* Template, uid, head position, sector list, max size, move rate, active *)
-  Boat of (baseunit * player_id * uuid * position * position list * int * int)
+module UnitState = struct
+  type t = {
+    template: UnitTemplate.t;
+    pid: player_id;
+    uid: unit_id;
+    head: position;
+    sectors: position list;
+    max_size: int;
+    move_rate: int;
+  } [@@deriving fields]
 
-and cell = 
-  Cell of (bool * uuid option * credit option)
+  let nextUID = ref 0
 
-and credit =
-  Credit of int
+  let create ~template ~sectors ~pid =
+    let max_size = UnitTemplate.base_size template in
+    let move_rate = UnitTemplate.base_move template in
+    let uid = UID(!nextUID) in
+    let () = incr nextUID in
+    {template; pid; uid; head = List.hd_exn sectors; sectors; max_size; move_rate}
+end
+
+module Cell = struct
+  type t = {
+    passable: bool;
+    uid_opt: unit_id option;
+    credit_opt: credit option;
+  } [@@deriving fields]
+end
   
-and map =
-  Map of (int * int * cell array array * position list * unitstate list)
+module Map = struct
+  type t = {
+    width: int;
+    height: int;
+    cells: Cell.t array array;
+    starts: position list;
+    enemy_units: UnitState.t list;
+  } [@@deriving fields]
+end
 
-and boardstate =
-  Board of (int * int * cell array array * unitstate list * unitstate list)
+module BoardState = struct
+  type t = {
+    width: int;
+    height: int;
+    cells: Cell.t array array;
+    player_units: UnitState.t list;
+    enemy_units: UnitState.t list;
+  } [@@deriving fields]
+end
 
+let get_affect_name {name} : Affect.t = name
 
-let get_affect_name affect = 
-  let Affect(name, _, _, _, _, _) = affect in
-  name
+let get_baseunit_name {name} : UnitTemplate.t = name
 
-let get_baseunit_name baseunit = 
-  let UnitTemplate(name, _, _, _, _) = baseunit in
-  name
-
-let nextUUID = ref 0
-
-let string_of_affect (Affect(name, desc, _, _, _, _)) =
+let string_of_affect {name; descr} : Affect.t =
   name ^ ": " ^ desc
-
-let make_unit baseunit sectors player_id =
-  (* Invariant, sectors is never empty *)
-  let UnitTemplate(_, _, _, maxsize, moverate) = baseunit in
-  let uuid = UUID(!nextUUID) in
-  let () = incr nextUUID in
-  Boat(baseunit, player_id, uuid, List.hd_exn sectors, sectors, maxsize, moverate)
 
 let find_unit units name =
   let same_name gunit =
@@ -80,7 +112,7 @@ let find_affect affects name =
   | Some res -> res
   | None -> raise (Invalid_argument("No such affect: " ^ name ^ "."))
 
-let char_of_uuid (UUID(i)) =
+let char_of_uuid (UID(i)) =
   match Char.of_int (i + 0x30) with
     None -> '`' (* hacks lol *)
   | Some(c) -> c

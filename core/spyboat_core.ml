@@ -9,46 +9,51 @@ let get_map () =
   let map = T.map_from_file "res/demo-level.json" units affects in
   (affects, units, map)
 
-let initialize_board affects units map unit_selection = 
-  let O.Map(width, height, cell_arr, starting_pos, enemies) = map in
+let initialize_board ~affects ~templates ~map ~choices = 
+  let module M = O.Map in
+  let module C = O.Cell in
+  let module U = O.UnitState in
+  let module T = O.UnitTemplate in
 
-  let to_unitstate: (O.position * string) -> O.unitstate =
+  let {M.width; M.height; M.cells; M.starts; M.enemy_units} = map in
+
+  let to_unitstate: (O.position * string) -> O.UnitState.t =
     fun (pos, unit_name) ->
       let () =
-        match (List.mem starting_pos pos) with
+        match (List.mem starts pos) with
         | false -> raise (Invalid_argument("No position"))
         | true -> ()
       in
       
-      let base_unit = O.find_unit units unit_name in
+      let template = List.find_exn ~f:(fun x -> T.name x = unit_name) templates in
 
       (* TODO treat this properly *)
-      O.make_unit base_unit [pos] O.Player
+      U.create ~template ~sectors:[pos] ~pid:O.Player
   in
 
-  let player_units = List.map ~f:to_unitstate unit_selection in
+  let player_units = List.map ~f:to_unitstate choices in
   (* TODO check starting position duplicates *)
 
   let update_arr units =
     let register_position uid (x, y) =
-      let row = Array.get cell_arr y in
-      let O.Cell(passable, _, credit) = Array.get row x in
-      let newcell = O.Cell(passable, Some(uid), credit) in
-      cell_arr.(y).(x) <- newcell
+      let row = Array.get cells y in
+      let {C.passable; C.credit_opt} = Array.get row x in
+      let newcell = C.Fields.create ~passable ~uid_opt:(Some(uid)) ~credit_opt in
+      cells.(y).(x) <- newcell
     in
 
-    let register_unit (O.Boat(_, _, uid, _, sectors, _, _)) = 
+    let register_unit {U.uid; U.sectors} = 
       List.iter ~f:(register_position uid) sectors
     in
 
     List.iter ~f:register_unit player_units;
-    List.iter ~f:register_unit enemies
+    List.iter ~f:register_unit enemy_units
   in
 
 
-  let () = update_arr units in
+  let () = update_arr enemy_units in
 
   (* TODO check empty *)
   let start :: _ = player_units in 
 
-  O.Board(width, height, cell_arr, player_units, enemies)
+  O.BoardState.Fields.create ~width ~height ~cells ~player_units ~enemy_units

@@ -12,7 +12,7 @@ type undo_information =
   | RefitHead of O.position list
 
 type board_action =
-  | Attack of (O.affect * O.position)
+  | Attack of (O.Affect.t * O.position)
   | Step of direction
   | Undo of undo_information
 
@@ -23,9 +23,9 @@ type game_action =
 
 type action_error =
   (* Couldn't find the corresponding UID *)
-  | NoSuchUnit of O.uuid
+  | NoSuchUnit of O.unit_id
   (* No commandeering other boats *)
-  | NotYourUnit of O.uuid
+  | NotYourUnit of O.unit_id
   (* Given unit doesn't have that action *)
   | NoSuchAffect of string
   (* Off the map, out of range, etc *)
@@ -34,7 +34,7 @@ type action_error =
   | NotYourTurn
 
 type response =
-  | Good of O.boardstate * undo_information option
+  | Good of O.BoardState.t * undo_information option
   | Bad of action_error
 
-val apply_action : O.boardstate -> O.unitstate -> board_action -> response
+val apply_action : O.BoardState.t -> O.UnitState.t -> board_action -> response

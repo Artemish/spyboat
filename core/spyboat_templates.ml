@@ -15,10 +15,10 @@ let to_pos_list lst =
 let affects_from_file path =
   let get_affect_type name magnitude =
     if (name = "damage") then
-      O.DAMAGE(magnitude)
+      O.Affect.DAMAGE(magnitude)
 
     else if (name = "health") then
-      O.HEALING(magnitude)
+      O.Affect.HEALING(magnitude)
 
     else if (name = "floor") then
       let floor =
@@ -27,13 +27,13 @@ let affects_from_file path =
       | _ -> true
       in
 
-      O.FLOOR(floor)
+      O.Affect.FLOOR(floor)
 
     else if (name = "stepcap") then
-      O.STEPCAP(magnitude)
+      O.Affect.STEPCAP(magnitude)
 
     else if (name = "sizecap") then
-      O.SIZECAP(magnitude)
+      O.Affect.SIZECAP(magnitude)
 
     else
       raise (Invalid_argument ("No such affect type: " ^ name ^ "."))
@@ -41,14 +41,14 @@ let affects_from_file path =
 
   let get_affect item =
     let name = item |> member "name" |> to_string in
-    let desc = item |> member "description" |> to_string in
+    let descr = item |> member "description" |> to_string in
     let atype = item |> member "type" |> to_string in
     let magnitude = item |> member "magnitude" |> to_int in
     let atype = get_affect_type atype magnitude in
     let range = item |> member "range" |> to_int in
     let reqsize = item |> member "requiredSize" |> to_int in
-    let sizecost = item |> member "cost" |> to_int in
-    O.Affect(name, desc, atype, sizecost, reqsize, range)
+    let cost = item |> member "cost" |> to_int in
+    O.Affect.Fields.create ~name ~descr ~atype ~cost ~reqsize ~range
   in 
 
   let buf = In_channel.read_all path in
@@ -60,13 +60,13 @@ let affects_from_file path =
 let units_from_file path affects =
   let get_unit item =
     let name = item |> member "name" |> to_string in
-    let desc = item |> member "description" |> to_string in
-    let moveRate = item |> member "moveRate" |> to_int in
-    let maxSize = item |> member "maxSize" |> to_int in
+    let descr = item |> member "description" |> to_string in
+    let base_move = item |> member "moveRate" |> to_int in
+    let base_size = item |> member "maxSize" |> to_int in
     let attacks = item |> member "attacks" |> to_list in
     let attack_names = List.map ~f:to_string attacks in
-    let attacks = List.map ~f:(O.find_affect affects) attack_names in
-    O.UnitTemplate(name, desc, attacks, maxSize, moveRate)
+    let affects = List.map ~f:(O.find_affect affects) attack_names in
+    O.UnitTemplate.Fields.create ~name ~descr ~affects ~base_size ~base_move
   in 
 
   let buf = In_channel.read_all path in
@@ -78,11 +78,11 @@ let units_from_file path affects =
 let map_from_file path units affects =
   let get_unit el = 
     let name = el |> member "name" |> to_string in
-    let baseunit = O.find_unit units name in
+    let template = O.find_unit units name in
     let sectors = el |> member "sectors" |> to_list in
     let sectors = to_pos_list sectors in
     (* TODO treat this properly *)
-    O.make_unit baseunit sectors O.Enemy
+    O.UnitState.create ~template ~sectors ~pid:O.Enemy
   in
 
   let buf = In_channel.read_all path in
