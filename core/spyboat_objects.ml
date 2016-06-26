@@ -87,16 +87,16 @@ module BoardState = struct
   } [@@deriving fields]
 end
 
-let get_affect_name {name} : Affect.t = name
+let get_affect_name affect = Affect.name affect
 
-let get_baseunit_name {name} : UnitTemplate.t = name
+let get_template_name template = UnitTemplate.name template
 
-let string_of_affect {name; descr} : Affect.t =
-  name ^ ": " ^ desc
+let string_of_affect affect =
+  (Affect.name affect) ^ ": " ^ (Affect.descr affect)
 
-let find_unit units name =
+let find_template units name =
   let same_name gunit =
-    (String.compare name (get_baseunit_name gunit) = 0)
+    (String.compare name (get_template_name gunit) = 0)
   in
 
   match (List.find ~f:same_name units) with

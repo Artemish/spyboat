@@ -75,10 +75,12 @@ let units_from_file path affects =
 
   List.map ~f:get_unit unit_lst
 
-let map_from_file path units affects =
+let map_from_file path templates affects =
+  let module C = O.Cell in
+
   let get_unit el = 
     let name = el |> member "name" |> to_string in
-    let template = O.find_unit units name in
+    let template = O.find_template templates name in
     let sectors = el |> member "sectors" |> to_list in
     let sectors = to_pos_list sectors in
     (* TODO treat this properly *)
@@ -91,12 +93,12 @@ let map_from_file path units affects =
   let height = js |> member "height" |> to_int in
   let spawns = js |> member "spawn-points" |> to_list in
   let enemies = js |> member "units" |> to_list in
-  let cells = js |> member "cells" |> to_list in
-  let baseCell = O.Cell(false, None, None) in
-  let gameCells =
+  let cell_list = js |> member "cells" |> to_list in
+  let baseCell = C.Fields.create ~passable:false ~uid_opt:None ~credit_opt:None in
+  let cells =
     Array.make_matrix ~dimx:height ~dimy:width baseCell in
 
-  let fillCells i str =
+  let fill_cells i str =
     let addArr j c =
       let add = 
         match c with
@@ -104,19 +106,19 @@ let map_from_file path units affects =
         | _ -> true
       in
 
-      let newcell = O.Cell(add, None, None) in
+      let newcell = C.Fields.create ~passable:add ~uid_opt:None ~credit_opt:None in
 
-      gameCells.(i).(j) <- newcell
+      cells.(i).(j) <- newcell
     in
 
     let chars = String.to_list (str |> to_string) in
     List.iteri ~f:addArr chars
   in
 
-  let _ = List.iteri ~f:fillCells cells in
+  let _ = List.iteri ~f:fill_cells cell_list in
 
-  let spawns = to_pos_list spawns in
+  let starts = to_pos_list spawns in
 
-  let enemies = List.map ~f:get_unit enemies in
+  let enemy_units = List.map ~f:get_unit enemies in
 
-  O.Map(width, height, gameCells, spawns, enemies)
+  O.Map.Fields.create ~width ~height ~cells ~starts ~enemy_units

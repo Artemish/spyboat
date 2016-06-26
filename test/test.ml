@@ -7,7 +7,9 @@ module P = Client_console.Client
 open Core.Std
 
 let rec game_step board undostack = 
-  let O.Board(_,_,_,start :: _, _) = board in
+  let module B = O.BoardState in
+
+  let {B.player_units = start :: _} = board in
   let action = P.get_move board start in
   
   let translated_action, undostack = 

@@ -1,12 +1,16 @@
 module O = Spyboat_objects 
 module L = Board_logic
-module T = ANSITerminal
+
+module Term = ANSITerminal
 
 open Core.Std
 
 module Client = struct
-  let print_board b = 
-    let O.Board(width, height, cells, player_units, enemy_units) = b in
+  let print_board boat =
+    let module B = O.BoardState in
+    let module C = O.Cell in
+
+    let {B.width; B.height; B.cells; B.player_units; B.enemy_units} = boat in
 
     let print_height = height * 2 + 1 in
     let print_width = width * 2 + 1 in
@@ -26,14 +30,14 @@ module Client = struct
     done;
 
     let mark_row y row = 
-      let mark_cell x (O.Cell(passable, uid_opt, cred_opt)) = 
+      let mark_cell x {C.passable; C.uid_opt; C.credit_opt} = 
         if (not passable) then parr.(2*y+1).(2*x+1) <- 'X'; 
 
         match uid_opt with
           None -> ()
         | Some(uuid) -> parr.(2*y+1).(2*x+1) <- O.char_of_uuid uuid;
 
-        match (cred_opt) with
+        match (credit_opt) with
           None -> ()
         | Some(_) -> parr.(2*y+1).(2*x+1) <- '$';
       in
@@ -49,20 +53,29 @@ module Client = struct
 
     Array.iter ~f:print_row parr 
 
-  let print_unit (O.Boat(base, _, uid, (p_x, p_y), _, max, move)) =
-    let O.UnitTemplate(name, descr, affects, _, _) = base in
+  let print_unit boat =
+    let module U = O.UnitState in
+    let module T = O.UnitTemplate in
+
+    let {U.template; U.uid; U.move_rate; U.max_size; U.head = (h_x, h_y)} = boat in
+    let {T.name; T.descr; T.affects} = template in
 
     Printf.printf "%s id: %c pos: (%d, %d): Max Size %d, move rate %d\n%s\n"
-        name (O.char_of_uuid uid) p_x p_y max move descr;
+        name (O.char_of_uuid uid) h_x h_y max_size move_rate descr;
+
     let affect_string = (String.concat ~sep:"\n\t" (List.map ~f:O.string_of_affect affects)) in
     Printf.printf "Affects:\n\t%s\n" affect_string
 
   let get_move b boat =
-    let () = T.erase T.Screen; T.move_cursor 0 (-100) in
+    let module T = O.UnitTemplate in 
+    let module U = O.UnitState in
+
+    let () = Term.erase Term.Screen; Term.move_cursor 0 (-100) in
     let () = print_board b in
     let () = print_unit boat in
     let () = print_string "move> " in
-    let O.Boat(O.UnitTemplate(_,_,affects,_,_), _, _, (h_x, h_y), _, _, _) = boat in
+
+    let {U.template = {O.UnitTemplate.affects}; U.head = (h_x, h_y)} = boat in
     let c = String.get (read_line ()) 0 in
 
     match c with 

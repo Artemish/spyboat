@@ -75,9 +75,10 @@ let rec cut_last lst =
 let handle_step boat board dir = 
   let module B = O.BoardState in
   let module U = O.UnitState in
+  let module C = O.Cell in
 
-  let {B.width; B.height; B.cells; B.player_units; B.enemy_units} = board in
-  let {U.template; U.pid; U.actor_uid; U.head; U.sectors; U.maxsize; U.moverate} = boat in
+  let {B.width; B.height; B.cells} = board in
+  let {U.uid = actor_uid; U.head; U.sectors; U.max_size} = boat in
 
   let (pos_x, pos_y) = head in
   let (newpos_x, newpos_y) as newpos = 
@@ -100,7 +101,7 @@ let handle_step boat board dir =
       | None -> 
           (* Moving onto a blank square *)
           let new_unitstate, undo_information = 
-            if (List.length sectors) >= maxsize
+            if (List.length sectors) >= max_size
             then 
               (* Cut out the last sector of the moving unit *)
               let (remaining, (old_x, old_y)) = cut_last sectors in
@@ -118,7 +119,7 @@ let handle_step boat board dir =
               boat, undo
           in
 
-          let () = cells.(newpos_y).(newpos_x) <- O.Cell(passable, Some(actor_uid), None) in
+          let () = cells.(newpos_y).(newpos_x) <- {passable; uid_opt = Some(actor_uid); credit_opt} in
 
           let new_board = update_unit_in_board new_unitstate board in
           Good(new_board, undo_information)
@@ -131,9 +132,7 @@ let handle_step boat board dir =
             (* replace sector *)
             let filter_newpos = List.filter ~f:((<>) newpos) sectors in
             let new_sectors = newpos :: filter_newpos in
-            let new_unitstate = 
-              O.Boat(template, pid, actor_uid, newpos, new_sectors, maxsize, moverate)
-            in
+            let new_unitstate = {boat with head = newpos; sectors = new_sectors} in
 
             let new_board = update_unit_in_board new_unitstate board in
             let undo_information = Some(RefitHead(sectors)) in
@@ -142,33 +141,38 @@ let handle_step boat board dir =
 
 (* {{{ Handle undo *)
 let handle_undo undo_info board boat =
-  let O.Board(width, height, cells, player_units, enemy_units) = board in
-  let O.Boat(base, player_id, uid, (h_x, h_y), sectors, maxsize, moverate) = boat in
+  let module B = O.BoardState in 
+  let module U = O.UnitState in 
+  let module C = O.Cell in 
+
+  let {B.cells} = board in
+  let {U.uid; U.head = (h_x, h_y); U.sectors} = boat in
   let new_unit =
     match undo_info with
     | TailAdd((r_x, r_y), credit_opt) ->
         (* Restore the cell at r_x, r_y *)
-        let O.Cell(r_passable, _, _) = cells.(r_y).(r_x) in
-        let O.Cell(h_passable, _, _) = cells.(h_y).(h_x) in
+        let {C.passable = r_passable} = cells.(r_y).(r_x) in
+        let {C.passable = r_passable} = cells.(h_y).(h_x) in
+        (* TODO check w/ exception *)
         let _ :: remaining = sectors in
         let new_sectors = List.append remaining [(r_x, r_y)] in
         let new_head = List.hd_exn new_sectors in
 
-        let () = cells.(r_y).(r_x) <- O.Cell(r_passable, Some(uid), None) in
-        let () = cells.(h_y).(h_x) <- O.Cell(h_passable, None, None) in
+        let () = cells.(r_y).(r_x) <- {cells.(r_y).(r_x) with C.uid_opt = Some(uid)} in
+        let () = cells.(h_y).(h_x) <- {cells.(r_y).(r_x) with C.uid_opt = None} in
 
-        O.Boat(base, player_id, uid, new_head, new_sectors, maxsize, moverate)
+        {boat with head = new_head; sectors = new_sectors}
 
     | HeadCut(credit_opt) ->
         let _ :: remaining = sectors in
         let new_head = List.hd_exn remaining in
-        let O.Cell(h_passable, _, _) = cells.(h_y).(h_x) in
-        let () = cells.(h_y).(h_x) <- O.Cell(h_passable, None, credit_opt) in
-        O.Boat(base, player_id, uid, new_head, remaining, maxsize, moverate)
+        let new_cell = {cells.(h_y).(h_x) with uid_opt = None; credit_opt = credit_opt} in
+        let () = cells.(h_y).(h_x) <- new_cell in
+        {boat with U.head = new_head; U.sectors = remaining}
     | RefitHead(previous_sectors) ->
         (* No cells need updating, sectors were merely shuffled *)
         let new_head = List.hd_exn previous_sectors in
-        O.Boat(base, player_id, uid, new_head, previous_sectors, maxsize, moverate)
+        {boat with U.head = new_head; U.sectors = previous_sectors}
   in
 
   let new_board = update_unit_in_board new_unit board in
@@ -176,11 +180,14 @@ let handle_undo undo_info board boat =
 (* }}} *)
 
 let unit_lookup uid_opt board = 
-  let O.Board(_,_,_,player_units,enemy_units) = board in
+  let module B = O.BoardState in 
+  let module U = O.UnitState in 
+
+  let {B.player_units; B.enemy_units} = board in
   match uid_opt with
   | None -> None
   | Some(uid) -> 
-      let same_name (O.Boat(_,_,uid',_,_,_,_)) = uid' = uid in
+      let same_name {U.uid = uid'} = uid' = uid in
       (match List.find ~f:same_name player_units with
       | Some(boat) -> Some(boat)
       | None ->
@@ -189,20 +196,24 @@ let unit_lookup uid_opt board =
           | None -> None))
 
 let handle_attack board boat affect (t_x, t_y) = 
-  let O.Board(width, height, cells, player_units, enemy_units) = board in
+  let module B = O.BoardState in 
+  let module U = O.UnitState in 
+  let module C = O.Cell in 
+  let module A = O.Affect in 
+
+  let {B.cells} = board in
   (* TODO Handle nonexistent affect? *)
-  let O.Boat(_, player_id, uid, (h_x, h_y), sectors, _, _) = boat in
-  let O.Affect(_, _, atype, sizecost, reqsize, range) = affect in
+  let {U.pid; U.uid; U.head = (h_x, h_y)} = boat in
+  let {A.atype; A.cost; A.reqsize; A.range} = affect in
 
   if not (within_bounds (t_x, t_y) board) 
   then Bad(BadPosition((t_x, t_y), "Off the map"))
   else
-    let O.Cell(passable, uid_opt, credit_opt) = cells.(t_y).(t_x) in
+    let {C.uid_opt; C.credit_opt} as old_cell = cells.(t_y).(t_x) in
     let boat_opt = unit_lookup uid_opt board in
     match (atype, boat_opt) with
-    | (O.FLOOR(new_passability), _) ->
-        let new_cell = O.Cell(new_passability, uid_opt, credit_opt) in
-        let () = cells.(t_y).(t_x) <- new_cell in
+    | (A.FLOOR(new_passability), _) ->
+        let () = cells.(t_y).(t_x) <-  {old_cell with C.passable = new_passability} in
         Good(board, None)
     
 

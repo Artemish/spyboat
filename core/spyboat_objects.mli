@@ -81,12 +81,10 @@ module BoardState : sig
 end
 
 val get_affect_name : Affect.t -> string
-
-val get_baseunit_name : UnitTemplate.t -> string
-
 val string_of_affect : Affect.t -> string
 
-val find_unit : UnitState.t list -> string -> UnitState.t
+val get_template_name : UnitTemplate.t -> string
+val find_template : UnitTemplate.t list -> string -> UnitTemplate.t
 
 val find_affect : Affect.t list -> string -> Affect.t
 
