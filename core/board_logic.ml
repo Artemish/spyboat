@@ -14,11 +14,6 @@ type board_action =
   | Step of direction
   | Undo of undo_information
 
-type game_action = 
-  | BoardAction of board_action
-  | RetireUnit
-  | EndTurn
-
 type action_error =
   (* Couldn't find the corresponding UID *)
   | NoSuchUnit of O.unit_id
@@ -29,7 +24,7 @@ type action_error =
   (* Off the map, out of range, etc *)
   | BadPosition of (O.position * string)
   (* I'm the captain here! *)
-  | NotYourTurn
+  | BadTarget of string
 
 type response =
   | Good of O.BoardState.t * undo_information option
@@ -48,7 +43,7 @@ let update_unit_in_board boat board =
     else O.BoardState.enemy_units board
   in
 
-  let same = (fun b -> O.UnitState.uid b != uid) in
+  let same = (fun b -> O.UnitState.uid b <> uid) in
 
   if player_id = O.Player
   then 
@@ -56,6 +51,29 @@ let update_unit_in_board boat board =
     {board with player_units = newlist;}
   else 
     let newlist = boat :: (List.filter ~f:same (O.BoardState.enemy_units board)) in
+    {board with enemy_units = newlist;}
+(* }}} *)
+
+(* TODO generalize to N players... big todo lol *)
+(* {{{ Remove a unit from the board *)
+let remove_unit_from_board boat board = 
+  let player_id = O.UnitState.pid boat in
+  let uid = O.UnitState.uid boat in
+
+  let baselist =
+    if player_id = O.Player
+    then O.BoardState.player_units board
+    else O.BoardState.enemy_units board
+  in
+
+  let same = (fun b -> O.UnitState.uid b <> uid) in
+
+  if player_id = O.Player
+  then 
+    let newlist = (List.filter ~f:same (O.BoardState.player_units board)) in
+    {board with player_units = newlist;}
+  else 
+    let newlist = (List.filter ~f:same (O.BoardState.enemy_units board)) in
     {board with enemy_units = newlist;}
 (* }}} *)
 
@@ -69,6 +87,18 @@ let rec cut_last lst =
     [] -> raise (Invalid_argument("Uh oh"))
   | [h] -> ([], h)
   | h :: t -> let (cut, last) = cut_last t in (h::cut, last)
+
+(* Returns (remaining, deleted) *)
+let cut_from_back to_remove lst = 
+  let len = List.length lst in
+  if (to_remove >= len)
+  then ([], lst)
+  else
+    let rec split_after_n n lst acc =
+      match (n, lst) with
+      | 0, lst -> (List.rev acc, lst)
+      | n, h::t -> split_after_n (n - 1) t (h :: acc)
+    in split_after_n (len - to_remove) lst []
 
 (* TODO do away with player vs. enemy and add player IDs *)
 (* {{{ Handle step *)
@@ -191,11 +221,12 @@ let unit_lookup uid_opt board =
       (match List.find ~f:same_name player_units with
       | Some(boat) -> Some(boat)
       | None ->
-          (match List.find ~f:same_name player_units with
+          (match List.find ~f:same_name enemy_units with
           | Some(boat) -> Some(boat)
           | None -> None))
 
-let handle_attack board boat affect (t_x, t_y) = 
+ (* {{{ Handle attack *)
+let handle_attack board boat affect (target_x, target_y) = 
   let module B = O.BoardState in 
   let module U = O.UnitState in 
   let module C = O.Cell in 
@@ -206,21 +237,48 @@ let handle_attack board boat affect (t_x, t_y) =
   let {U.pid; U.uid; U.head = (h_x, h_y)} = boat in
   let {A.atype; A.cost; A.reqsize; A.range} = affect in
 
-  if not (within_bounds (t_x, t_y) board) 
-  then Bad(BadPosition((t_x, t_y), "Off the map"))
-  else
-    let {C.uid_opt; C.credit_opt} as old_cell = cells.(t_y).(t_x) in
-    let boat_opt = unit_lookup uid_opt board in
-    match (atype, boat_opt) with
-    | (A.FLOOR(new_passability), _) ->
-        let () = cells.(t_y).(t_x) <-  {old_cell with C.passable = new_passability} in
-        Good(board, None)
-    
+  if not (within_bounds (target_x, target_y) board) 
+  then Bad(BadPosition((target_x, target_y), "Off the map")) else
+
+  if (abs (h_x - target_x) + abs (h_y - target_y)) > range 
+  then Bad(BadPosition((target_x, target_y), "Out of range")) else
+
+  let {C.uid_opt; C.credit_opt} as old_cell = cells.(target_y).(target_x) in
+  let boat_opt = unit_lookup uid_opt board in
+
+  match (atype, boat_opt) with
+  | (A.FLOOR(new_passability), _) ->
+      let () = cells.(target_y).(target_x) <-  {old_cell with C.passable = new_passability} in
+      Good(board, None)
+  | (A.DAMAGE(damage), Some(target)) ->
+      let {U.pid = target_pid; U.uid = target_uid; U.sectors} = target in
+
+      if (target_pid == pid)
+      then Bad(BadTarget("Can't hit your own dude")) else
+
+      let (remaining, deleted) = cut_from_back damage sectors in
+
+      let delete_sector (x,y) = 
+        let old_cell = cells.(y).(x) in
+        cells.(y).(x) <- {old_cell with uid_opt = None}
+      in
+
+      let () = List.iter ~f:delete_sector deleted in
+
+      (match remaining with
+      | [] -> Good(remove_unit_from_board target board, None)
+      | _ -> 
+          let new_unit = {target with U.sectors = remaining} in
+          Good(update_unit_in_board new_unit board, None))
+  | (A.DAMAGE(_), None) ->
+      Bad(BadTarget("Nothing to hit"))
+
+(* }}} *)
 
 let apply_action board boat action =
   match action with
   | Step(dir) ->
       handle_step boat board dir 
   | Undo(undo_info) -> handle_undo undo_info board boat 
-  | Attack(affect, target) -> handle_attack board boat affect target 
-  | _ -> Bad(NotYourTurn)
+  | Attack(affect, target_pos) -> handle_attack board boat affect target_pos
+  | _ -> Bad(BadTarget("uhhh"))

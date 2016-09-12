@@ -16,11 +16,6 @@ type board_action =
   | Step of direction
   | Undo of undo_information
 
-type game_action = 
-  | BoardAction of board_action
-  | RetireUnit
-  | EndTurn
-
 type action_error =
   (* Couldn't find the corresponding UID *)
   | NoSuchUnit of O.unit_id
@@ -30,8 +25,8 @@ type action_error =
   | NoSuchAffect of string
   (* Off the map, out of range, etc *)
   | BadPosition of (O.position * string)
-  (* I'm the captain here! *)
-  | NotYourTurn
+  (* Heal enemy, attack ally, etc *)
+  | BadTarget of string
 
 type response =
   | Good of O.BoardState.t * undo_information option

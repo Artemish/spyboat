@@ -1,29 +1,30 @@
 module C = Spyboat_core
 module O = Spyboat_objects
-module L = Board_logic
+module B = Board_logic
+module G = Game_logic
 
 module P = Client_console.Client
 
 open Core.Std
 
 let rec game_step board undostack = 
-  let module B = O.BoardState in
+  let module BS = O.BoardState in
 
-  let {B.player_units = start :: _} = board in
+  let {BS.player_units = start :: _} = board in
   let action = P.get_move board start in
   
   let translated_action, undostack = 
     match action with
-    | L.BoardAction(L.Undo(L.HeadCut(None))) ->
+    | G.BoardAction(Board_logic.Undo(B.HeadCut(None))) ->
         let undo_step :: remaining = undostack in
-        L.BoardAction(L.Undo(undo_step)), remaining
+        G.BoardAction(B.Undo(undo_step)), remaining
     | _ -> action, undostack
   in
 
   match translated_action with
-  | L.BoardAction(baction) ->
-    (match L.apply_action board start baction with
-    | L.Good(new_bstate, undo_opt) ->
+  | G.BoardAction(baction) ->
+    (match B.apply_action board start baction with
+    | B.Good(new_bstate, undo_opt) ->
         let new_undostack =
           (match undo_opt with
           | Some(undo) -> undo :: undostack
@@ -31,8 +32,10 @@ let rec game_step board undostack =
         in 
         
         game_step new_bstate new_undostack
-    | L.Bad(L.BadPosition((p_x, p_y), msg)) ->
-        Printf.printf "(%d, %d): %s" p_x p_y msg)
+    | B.Bad(B.BadPosition((p_x, p_y), msg)) ->
+        Printf.printf "(%d, %d): %s" p_x p_y msg
+    | B.Bad(B.BadTarget(reason)) ->
+        Printf.printf "Bad: %s" reason)
  | RetireUnit -> ()
  | EndTurn -> ()
 
@@ -40,7 +43,7 @@ let rec game_step board undostack =
 let main () = 
   let (affects, units, map) = C.get_map () in
   let choice =
-    [(6, 1), "Hack 3.0"]
+    [(6, 1), "Hack 3.0"; (7,1), "Hack 3.0"]
   in
   let b = C.initialize_board affects units map choice in
   game_step b []

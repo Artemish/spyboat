@@ -14,7 +14,7 @@ Library spyboat_core
   BuildTools:   ocamlbuild
   BuildDepends: threads, core, yojson, ppx_jane, fieldslib
   FindLibname:  spyboat-core
-  Modules:      Spyboat_core, Spyboat_objects, Spyboat_templates, Board_logic
+  Modules:      Spyboat_core, Spyboat_objects, Spyboat_templates, Board_logic, Game_logic
 
 Library client
   Path:         clients

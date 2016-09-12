@@ -34,24 +34,17 @@ let initialize_board ~affects ~templates ~map ~choices =
   let player_units = List.map ~f:to_unitstate choices in
   (* TODO check starting position duplicates *)
 
-  let update_arr units =
-    let register_position uid (x, y) =
-      let row = Array.get cells y in
-      let {C.passable; C.credit_opt} = Array.get row x in
-      let newcell = C.Fields.create ~passable ~uid_opt:(Some(uid)) ~credit_opt in
-      cells.(y).(x) <- newcell
-    in
-
-    let register_unit {U.uid; U.sectors} = 
-      List.iter ~f:(register_position uid) sectors
-    in
-
-    List.iter ~f:register_unit player_units;
-    List.iter ~f:register_unit enemy_units
+  let register_position uid (x, y) =
+    let newcell = {cells.(y).(x) with uid_opt = Some(uid)} in
+    cells.(y).(x) <- newcell
   in
 
+  let register_unit {U.uid; U.sectors} = 
+    List.iter ~f:(register_position uid) sectors
+  in
 
-  let () = update_arr enemy_units in
+  List.iter ~f:register_unit player_units;
+  List.iter ~f:register_unit enemy_units;
 
   (* TODO check empty *)
   let start :: _ = player_units in 

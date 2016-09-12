@@ -1,5 +1,6 @@
 module O = Spyboat_objects 
-module L = Board_logic
+module B = Board_logic
+module G = Game_logic
 
 module Term = ANSITerminal
 
@@ -79,21 +80,21 @@ module Client = struct
     let c = String.get (read_line ()) 0 in
 
     match c with 
-    | '^' -> L.BoardAction(L.Step(L.UP))
-    | 'v' -> L.BoardAction(L.Step(L.DOWN))
-    | '<' -> L.BoardAction(L.Step(L.LEFT))
-    | '>' -> L.BoardAction(L.Step(L.RIGHT))
+    | '^' -> G.BoardAction(B.Step(B.UP))
+    | 'v' -> G.BoardAction(B.Step(B.DOWN))
+    | '<' -> G.BoardAction(B.Step(B.LEFT))
+    | '>' -> G.BoardAction(B.Step(B.RIGHT))
 
     (* TODO figure out a resonable abstraction for undoing *)
-    | 'u' -> L.BoardAction(L.Undo(L.HeadCut(None)))
+    | 'u' -> G.BoardAction(B.Undo(B.HeadCut(None)))
     | 'a' ->
         begin
           let input = read_line () in
           Scanf.sscanf input "%d %d %d" (fun aid d_x d_y ->
             let affect = List.nth_exn affects aid in
             let target = h_x + d_x, h_y + d_y in
-            L.BoardAction(L.Attack(affect, target)))
+            G.BoardAction(B.Attack(affect, target)))
         end
-    | _ -> L.BoardAction(L.Step(L.DOWN))
+    | _ -> G.BoardAction(B.Step(B.DOWN))
 
 end
