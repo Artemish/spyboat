@@ -38,9 +38,9 @@ module Client = struct
           None -> ()
         | Some(uuid) -> parr.(2*y+1).(2*x+1) <- O.char_of_uuid uuid;
 
-        match (credit_opt) with
-          None -> ()
-        | Some(_) -> parr.(2*y+1).(2*x+1) <- '$';
+          match (credit_opt) with
+            None -> ()
+          | Some(_) -> parr.(2*y+1).(2*x+1) <- '$';
       in
 
       Array.iteri ~f:mark_cell row
@@ -62,7 +62,7 @@ module Client = struct
     let {T.name; T.descr; T.affects} = template in
 
     Printf.printf "%s id: %c pos: (%d, %d): Max Size %d, move rate %d\n%s\n"
-        name (O.char_of_uuid uid) h_x h_y max_size move_rate descr;
+      name (O.char_of_uuid uid) h_x h_y max_size move_rate descr;
 
     let affect_string = (String.concat ~sep:"\n\t" (List.map ~f:O.string_of_affect affects)) in
     Printf.printf "Affects:\n\t%s\n" affect_string
@@ -80,21 +80,21 @@ module Client = struct
     let c = String.get (read_line ()) 0 in
 
     match c with 
-    | '^' -> G.BoardAction(B.Step(B.UP))
-    | 'v' -> G.BoardAction(B.Step(B.DOWN))
-    | '<' -> G.BoardAction(B.Step(B.LEFT))
-    | '>' -> G.BoardAction(B.Step(B.RIGHT))
+    | 'w' -> G.BoardAction(B.Step(B.UP))
+    | 's' -> G.BoardAction(B.Step(B.DOWN))
+    | 'a' -> G.BoardAction(B.Step(B.LEFT))
+    | 'd' -> G.BoardAction(B.Step(B.RIGHT))
 
     (* TODO figure out a resonable abstraction for undoing *)
     | 'u' -> G.BoardAction(B.Undo(B.HeadCut(None)))
     | 'a' ->
-        begin
-          let input = read_line () in
-          Scanf.sscanf input "%d %d %d" (fun aid d_x d_y ->
+      begin
+        let input = read_line () in
+        Scanf.sscanf input "%d %d %d" (fun aid d_x d_y ->
             let affect = List.nth_exn affects aid in
             let target = h_x + d_x, h_y + d_y in
             G.BoardAction(B.Attack(affect, target)))
-        end
+      end
     | _ -> G.BoardAction(B.Step(B.DOWN))
 
 end
