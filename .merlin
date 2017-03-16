@@ -1,0 +1,5 @@
+PKG core lwt threads yojson ppx_jane fieldslib ppx_deriving_yojson
+S clients
+S core
+B _build/clients
+B _build/core
