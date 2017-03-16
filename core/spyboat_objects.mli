@@ -1,14 +1,15 @@
 open Core.Std
 
-type unit_id = UID of int
+type unit_id = UID of int [@@deriving yojson]
 
 (* TODO use real IDs *)
 type player_id = 
   | Player
   | Enemy
+  [@@deriving yojson]
 
-type position = (int * int)
-type credit = Credit of int
+type position = (int * int) [@@deriving yojson]
+type credit = Credit of int [@@deriving yojson]
 
 module Affect : sig
   type affecttype = 
@@ -17,6 +18,7 @@ module Affect : sig
     | FLOOR of bool
     | STEPCAP of int
     | SIZECAP of int
+    [@@deriving yojson]
 
   type t = {
     name: string;
@@ -25,7 +27,7 @@ module Affect : sig
     cost: int;
     reqsize: int;
     range: int;
-  } [@@deriving fields]
+  } [@@deriving fields, yojson]
 end
 
 module UnitTemplate : sig
@@ -35,7 +37,7 @@ module UnitTemplate : sig
     affects: Affect.t list;
     base_size: int;
     base_move: int;
-  } [@@deriving fields]
+  } [@@deriving fields, yojson]
 end
 
 module UnitState : sig 
@@ -47,7 +49,7 @@ module UnitState : sig
     sectors: position list;
     max_size: int;
     move_rate: int;
-  } [@@deriving fields]
+  } [@@deriving fields, yojson]
 
   val create : template:UnitTemplate.t -> sectors:(position list) -> pid:player_id -> t
 end 
@@ -57,7 +59,7 @@ module Cell : sig
     passable: bool;
     uid_opt: unit_id option;
     credit_opt: credit option;
-  } [@@deriving fields]
+  } [@@deriving fields, yojson]
 end
   
 module Map : sig 
@@ -67,7 +69,7 @@ module Map : sig
     cells: Cell.t array array;
     starts: position list;
     enemy_units: UnitState.t list;
-  } [@@deriving fields]
+  } [@@deriving fields, yojson]
 end
 
 module BoardState : sig 
@@ -77,7 +79,7 @@ module BoardState : sig
     cells: Cell.t array array;
     player_units: UnitState.t list;
     enemy_units: UnitState.t list;
-  } [@@deriving fields]
+  } [@@deriving fields, yojson]
 end
 
 val get_affect_name : Affect.t -> string

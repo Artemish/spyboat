@@ -1,14 +1,15 @@
 open Core.Std
 
-type unit_id = UID of int
+type unit_id = UID of int [@@deriving yojson]
 
 (* TODO use real IDs *)
 type player_id = 
   | Player
   | Enemy
+  [@@deriving yojson]
 
-type position = (int * int)
-type credit = Credit of int
+type position = (int * int) [@@deriving yojson]
+type credit = Credit of int [@@deriving yojson]
 
 module Affect = struct
   type affecttype = 
@@ -17,6 +18,7 @@ module Affect = struct
     | FLOOR of bool
     | STEPCAP of int
     | SIZECAP of int
+    [@@deriving yojson]
 
   type t = {
     name: string;
@@ -25,7 +27,7 @@ module Affect = struct
     cost: int;
     reqsize: int;
     range: int;
-  } [@@deriving fields]
+  } [@@deriving fields, yojson]
 end
 
 module UnitTemplate = struct
@@ -35,7 +37,7 @@ module UnitTemplate = struct
     affects: Affect.t list;
     base_size: int;
     base_move: int;
-  } [@@deriving fields]
+  } [@@deriving fields, yojson]
 end
 
 module UnitState = struct
@@ -47,7 +49,7 @@ module UnitState = struct
     sectors: position list;
     max_size: int;
     move_rate: int;
-  } [@@deriving fields]
+  } [@@deriving fields, yojson]
 
   let nextUID = ref 0
 
@@ -64,7 +66,7 @@ module Cell = struct
     passable: bool;
     uid_opt: unit_id option;
     credit_opt: credit option;
-  } [@@deriving fields]
+  } [@@deriving fields, yojson]
 end
   
 module Map = struct
@@ -74,7 +76,7 @@ module Map = struct
     cells: Cell.t array array;
     starts: position list;
     enemy_units: UnitState.t list;
-  } [@@deriving fields]
+  } [@@deriving fields, yojson]
 end
 
 module BoardState = struct
@@ -84,7 +86,7 @@ module BoardState = struct
     cells: Cell.t array array;
     player_units: UnitState.t list;
     enemy_units: UnitState.t list;
-  } [@@deriving fields]
+  } [@@deriving fields, yojson]
 end
 
 let get_affect_name affect = Affect.name affect
