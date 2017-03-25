@@ -1,0 +1,135 @@
+syntax = "proto3";
+package spyboat;
+
+message Affect {
+  oneof affect_type {
+    int16 damage = 10;
+    int16 healing = 11;
+    bool floor = 12;
+    int16 stepcap = 13;
+    int16 sizecap = 14;
+  }
+
+  string name = 1;
+  string description = 2;
+  sint16 size_cost = 3;
+  uint16 reqsize = 4;
+  uint16 range = 5;
+}
+
+enum PlayerId {
+  Player = 0;
+  Enemy = 1;
+}
+
+message UnitId {
+  PlayerId player_id = 1;
+  uint16 unit_id = 2;
+}
+
+message Position {
+  uint16 x = 1;
+  uint16 y = 2;
+}
+
+message Unit {
+  string name = 1;
+  string description = 2;
+  repeated Affect affects = 3;
+  uint16 move_rate = 4;
+  uint16 max_size = 5;
+  UnitId unit_id = 6;
+  uint16 player_id = 7;
+  repeated Position sectors = 8;
+}
+
+message Cell {
+  bool passable = 1 [default = true];
+  UnitId unit_id = 2;
+  uint16 credit_value = 3; 
+}
+
+message Grid {
+  uint16 width = 1 [default = 16]; 
+  uint16 height = 2 [default = 13]; 
+  repeated Cell cells = 3;
+}
+
+message GameState {
+  PlayerId current_player = 1;
+  UnitId current_unit = 2;
+  Grid board = 3;
+  bool game_over = 4;
+}
+
+message StartingState {
+  Grid board = 1; 
+
+  // Unit templates is a numbered list of units,
+  // a player's selection is an index in this list 
+  repeated Unit templates = 2;
+
+  // A list of positions the player can place units
+  repeated Position starts = 3;
+}
+
+message UnitSelection {
+  Position pos = 1;
+  uint16 selection_number = 2;
+}
+
+message PlayerConfiguration {
+  repeated UnitSelection selections = 1;
+}
+
+message Error {
+  string description = 1;
+}
+
+message Action {
+  message DoMove {
+    Unit unit = 1;
+    Position target = 2;
+  }
+
+  message DoAffect {
+    Unit unit = 1;
+    string affect_name = 2;
+    Position target = 3;
+  }
+
+  message DoUndo {}
+
+  message DoRetire {
+    Unit retiree = 1;
+  }
+
+  oneof action {
+    DoMove move = 1;
+    DoAffect affect = 2;
+    DoUndo undo = 3;
+    DoReture retire = 4;
+  }
+}
+
+message EnemyAction {
+  Action action = 1;
+  GameState game_state = 2;
+}
+
+// Current game flow:
+
+// Initialization:
+// Client opens socket to server, initialized gpb
+// Server sends StartingState
+// Client sends PlayerConfiguration
+
+// Main game loop:
+// Server sends GameState
+// If it's the player's turn:
+//   Client sends Action 
+//   Server processes Move, and sends back Error or GameState
+//   When server detects that there's no more free units, control passes to enemy
+// If it's the enemy's turn:
+//   Server sends a series of EnemyActions, then player control resumes
+// When the endgame conditions are met, server sends a GameState with game_over = true
