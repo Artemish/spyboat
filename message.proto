@@ -1,20 +1,20 @@
-syntax = "proto3";
+// syntax = "proto3";
 package spyboat;
 
 message Affect {
   oneof affect_type {
-    int16 damage = 10;
-    int16 healing = 11;
+    uint32 damage = 10;
+    uint32 healing = 11;
     bool floor = 12;
-    int16 stepcap = 13;
-    int16 sizecap = 14;
+    uint32 stepcap = 13;
+    uint32 sizecap = 14;
   }
 
-  string name = 1;
-  string description = 2;
-  sint16 size_cost = 3;
-  uint16 reqsize = 4;
-  uint16 range = 5;
+  optional string name = 1;
+  optional string description = 2;
+  optional sint32 size_cost = 3;
+  optional uint32 reqsize = 4;
+  optional uint32 range = 5;
 }
 
 enum PlayerId {
@@ -23,47 +23,47 @@ enum PlayerId {
 }
 
 message UnitId {
-  PlayerId player_id = 1;
-  uint16 unit_id = 2;
+  optional PlayerId player_id = 1;
+  optional uint32 unit_id = 2;
 }
 
 message Position {
-  uint16 x = 1;
-  uint16 y = 2;
+  optional uint32 x = 1;
+  optional uint32 y = 2;
 }
 
 message Unit {
-  string name = 1;
-  string description = 2;
+  optional string name = 1;
+  optional string description = 2;
   repeated Affect affects = 3;
-  uint16 move_rate = 4;
-  uint16 max_size = 5;
-  UnitId unit_id = 6;
-  uint16 player_id = 7;
+  optional uint32 move_rate = 4;
+  optional uint32 max_size = 5;
+  optional UnitId unit_id = 6;
+  optional uint32 player_id = 7;
   repeated Position sectors = 8;
 }
 
 message Cell {
-  bool passable = 1 [default = true];
-  UnitId unit_id = 2;
-  uint16 credit_value = 3; 
+  optional bool passable = 1 [default = true];
+  optional UnitId unit_id = 2;
+  optional uint32 credit_value = 3; 
 }
 
 message Grid {
-  uint16 width = 1 [default = 16]; 
-  uint16 height = 2 [default = 13]; 
+  optional uint32 width = 1 [default = 16]; 
+  optional uint32 height = 2 [default = 13]; 
   repeated Cell cells = 3;
 }
 
 message GameState {
-  PlayerId current_player = 1;
-  UnitId current_unit = 2;
-  Grid board = 3;
-  bool game_over = 4;
+  optional PlayerId current_player = 1;
+  optional UnitId current_unit = 2;
+  optional Grid board = 3;
+  optional bool game_over = 4;
 }
 
 message StartingState {
-  Grid board = 1; 
+  optional Grid board = 1; 
 
   // Unit templates is a numbered list of units,
   // a player's selection is an index in this list 
@@ -74,8 +74,8 @@ message StartingState {
 }
 
 message UnitSelection {
-  Position pos = 1;
-  uint16 selection_number = 2;
+  optional Position pos = 1;
+  optional uint32 selection_number = 2;
 }
 
 message PlayerConfiguration {
@@ -83,38 +83,38 @@ message PlayerConfiguration {
 }
 
 message Error {
-  string description = 1;
+  optional string description = 1;
 }
 
 message Action {
   message DoMove {
-    Unit unit = 1;
-    Position target = 2;
+    optional Unit unit = 1;
+    optional Position target = 2;
   }
 
   message DoAffect {
-    Unit unit = 1;
-    string affect_name = 2;
-    Position target = 3;
+    optional Unit unit = 1;
+    optional string affect_name = 2;
+    optional Position target = 3;
   }
 
   message DoUndo {}
 
   message DoRetire {
-    Unit retiree = 1;
+    optional Unit retiree = 1;
   }
 
   oneof action {
     DoMove move = 1;
     DoAffect affect = 2;
     DoUndo undo = 3;
-    DoReture retire = 4;
+    DoRetire retire = 4;
   }
 }
 
 message EnemyAction {
-  Action action = 1;
-  GameState game_state = 2;
+  optional Action action = 1;
+  optional GameState game_state = 2;
 }
 
 // Current game flow:
