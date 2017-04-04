@@ -22,7 +22,7 @@ enum PlayerId {
   Enemy = 1;
 }
 
-message UnitId {
+message ProgramId {
   optional PlayerId player_id = 1;
   optional uint32 unit_id = 2;
 }
@@ -32,20 +32,20 @@ message Position {
   optional uint32 y = 2;
 }
 
-message Unit {
+message Program {
   optional string name = 1;
   optional string description = 2;
   repeated Affect affects = 3;
   optional uint32 move_rate = 4;
   optional uint32 max_size = 5;
-  optional UnitId unit_id = 6;
+  optional ProgramId unit_id = 6;
   optional uint32 player_id = 7;
   repeated Position sectors = 8;
 }
 
 message Cell {
   optional bool passable = 1 [default = true];
-  optional UnitId unit_id = 2;
+  optional ProgramId unit_id = 2;
   optional uint32 credit_value = 3; 
 }
 
@@ -57,7 +57,7 @@ message Grid {
 
 message GameState {
   optional PlayerId current_player = 1;
-  optional UnitId current_unit = 2;
+  optional ProgramId current_unit = 2;
   optional Grid board = 3;
   optional bool game_over = 4;
 }
@@ -65,21 +65,21 @@ message GameState {
 message StartingState {
   optional Grid board = 1; 
 
-  // Unit templates is a numbered list of units,
+  // Program templates is a numbered list of units,
   // a player's selection is an index in this list 
-  repeated Unit templates = 2;
+  repeated Program templates = 2;
 
   // A list of positions the player can place units
   repeated Position starts = 3;
 }
 
-message UnitSelection {
-  optional Position pos = 1;
-  optional uint32 selection_number = 2;
-}
-
 message PlayerConfiguration {
-  repeated UnitSelection selections = 1;
+  message ProgramSelection {
+    optional Position pos = 1;
+    optional uint32 selection_number = 2;
+  }
+
+  repeated ProgramSelection selections = 1;
 }
 
 message Error {
@@ -88,12 +88,12 @@ message Error {
 
 message Action {
   message DoMove {
-    optional Unit unit = 1;
+    optional Program unit = 1;
     optional Position target = 2;
   }
 
   message DoAffect {
-    optional Unit unit = 1;
+    optional Program unit = 1;
     optional string affect_name = 2;
     optional Position target = 3;
   }
@@ -101,7 +101,7 @@ message Action {
   message DoUndo {}
 
   message DoRetire {
-    optional Unit retiree = 1;
+    optional ProgramId retiree = 1;
   }
 
   oneof action {
