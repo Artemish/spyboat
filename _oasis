@@ -12,9 +12,9 @@ Flag examples
 Library spyboat_core
   Path:         core
   BuildTools:   ocamlbuild
-  BuildDepends: threads, core, yojson, ppx_jane, fieldslib, ppx_deriving_yojson
+  BuildDepends: threads, core, yojson, ppx_jane, ppx_deriving_yojson, ocaml-protoc
   FindLibname:  spyboat-core
-  Modules:      Spyboat_core, Spyboat_objects, Spyboat_templates, Board_logic, Game_logic
+  Modules:      Spyboat_core, Message_pb, Spyboat_templates, Board_logic, Game_logic
 
 Library client
   Path:         clients
