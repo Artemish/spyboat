@@ -1,24 +1,25 @@
-module O = Spyboat_objects
-
 open Core.Std
+open Message_pb
 open Yojson
 open Yojson.Basic.Util
 
+let to_some s = Some(s)
+
 let to_pos_list lst = 
   let make_pos el =
-    let x = el |> member "x" |> to_int in
-    let y = el |> member "y" |> to_int in
-    (x, y)
+    let x = el |> member "x" |> to_int |> to_some in
+    let y = el |> member "y" |> to_int |> to_some in
+    default_position ~x ~y ()
   in
   List.map ~f:make_pos lst
 
 let affects_from_file path =
   let get_affect_type name magnitude =
     if (name = "damage") then
-      O.Affect.DAMAGE(magnitude)
+      Damage(magnitude)
 
     else if (name = "health") then
-      O.Affect.HEALING(magnitude)
+      Healing(magnitude)
 
     else if (name = "floor") then
       let floor =
@@ -27,29 +28,31 @@ let affects_from_file path =
       | _ -> true
       in
 
-      O.Affect.FLOOR(floor)
+      Floor(floor)
 
     else if (name = "stepcap") then
-      O.Affect.STEPCAP(magnitude)
+      Stepcap(magnitude)
 
     else if (name = "sizecap") then
-      O.Affect.SIZECAP(magnitude)
+      Sizecap(magnitude)
 
     else
       raise (Invalid_argument ("No such affect type: " ^ name ^ "."))
   in
 
   let get_affect item =
-    let name = item |> member "name" |> to_string in
-    let descr = item |> member "description" |> to_string in
-    let atype = item |> member "type" |> to_string in
+    let atype_string = item |> member "type" |> to_string in
     let magnitude = item |> member "magnitude" |> to_int in
-    let atype = get_affect_type atype magnitude in
-    let range = item |> member "range" |> to_int in
-    let reqsize = item |> member "requiredSize" |> to_int in
-    let cost = item |> member "cost" |> to_int in
-    O.Affect.Fields.create ~name ~descr ~atype ~cost ~reqsize ~range
-  in 
+    let affect_type = get_affect_type atype_string magnitude in
+
+    let name = item |> member "name" |> to_string |> to_some in
+    let description = item |> member "description" |> to_string |> to_some in
+    let range = item |> member "range" |> to_int |> to_some in
+    let reqsize = item |> member "requiredSize" |> to_int |> to_some in
+    let size_cost = item |> member "cost" |> to_int |> to_some in
+
+    default_affect ~affect_type ~name ~description ~reqsize ~range ~size_cost ()
+  in
 
   let buf = In_channel.read_all path in
   let js = Yojson.Basic.from_string buf in
@@ -59,14 +62,18 @@ let affects_from_file path =
 
 let units_from_file path affects =
   let get_unit item =
-    let name = item |> member "name" |> to_string in
-    let descr = item |> member "description" |> to_string in
-    let base_move = item |> member "moveRate" |> to_int in
-    let base_size = item |> member "maxSize" |> to_int in
+    let name = item |> member "name" |> to_string |> to_some in
+    let description = item |> member "description" |> to_string |> to_some in
+    let move_rate = item |> member "moveRate" |> to_int |> to_some in
+    let max_size = item |> member "maxSize" |> to_int |> to_some in
     let attacks = item |> member "attacks" |> to_list in
     let attack_names = List.map ~f:to_string attacks in
-    let affects = List.map ~f:(O.find_affect affects) attack_names in
-    O.UnitTemplate.Fields.create ~name ~descr ~affects ~base_size ~base_move
+
+    let same_name name (affect : affect) = Some(name) = affect.name in
+    let get_affect_from_name name affects = List.find_exn ~f:(same_name name) affects in
+    let affect = List.map ~f:(get_affect_from_name) attack_names in
+
+    default_program ~name ~description ~affects ~move_rate ~max_size () 
   in 
 
   let buf = In_channel.read_all path in
@@ -75,16 +82,24 @@ let units_from_file path affects =
 
   List.map ~f:get_unit unit_lst
 
-let map_from_file path templates affects =
-  let module C = O.Cell in
+let current_id = ref 1
 
+let next_id player_id =
+  let player_id = Some(player_id) in
+  let unit_id = Some(!current_id) in
+  let () = incr current_id in
+  default_program_id ~player_id ~unit_id () 
+
+let map_from_file path programs affects =
   let get_unit el = 
     let name = el |> member "name" |> to_string in
-    let template = O.find_template templates name in
     let sectors = el |> member "sectors" |> to_list in
     let sectors = to_pos_list sectors in
-    (* TODO treat this properly *)
-    O.UnitState.create ~template ~sectors ~pid:O.Enemy
+    let program_id = Some(next_id Enemy) in
+
+    let same_name name (program : program) = program.name = Some(name) in
+    let program = List.find_exn ~f:(same_name name) programs in
+    { program with sectors; program_id }
   in
 
   let buf = In_channel.read_all path in
@@ -94,31 +109,12 @@ let map_from_file path templates affects =
   let spawns = js |> member "spawn-points" |> to_list in
   let enemies = js |> member "units" |> to_list in
   let cell_list = js |> member "cells" |> to_list in
-  let baseCell = C.Fields.create ~passable:false ~uid_opt:None ~credit_opt:None in
-  let cells =
-    Array.make_matrix ~dimx:height ~dimy:width baseCell in
 
-  let fill_cells i str =
-    let addArr j c =
-      let add = 
-        match c with
-        | ' ' -> false
-        | _ -> true
-      in
-
-      let newcell = C.Fields.create ~passable:add ~uid_opt:None ~credit_opt:None in
-
-      cells.(i).(j) <- newcell
-    in
-
-    let chars = String.to_list (str |> to_string) in
-    List.iteri ~f:addArr chars
-  in
-
-  let _ = List.iteri ~f:fill_cells cell_list in
+  let make_cell i = default_cell ~passable(List.nth_exn cell_list i = 1) () in
+  let cells = List.map ~f:make_cell  (List.range 0 (width * height)) in
 
   let starts = to_pos_list spawns in
 
   let enemy_units = List.map ~f:get_unit enemies in
 
-  O.Map.Fields.create ~width ~height ~cells ~starts ~enemy_units
+  create ~width ~height ~cells ~starts ~enemy_units
