@@ -1,28 +1,28 @@
 [@@@ocaml.warning "-27-30-39"]
 
 type affect_affect_type =
-  | Damage of int32
-  | Healing of int32
+  | Damage of int
+  | Healing of int
   | Floor of bool
-  | Stepcap of int32
-  | Sizecap of int32
+  | Stepcap of int
+  | Sizecap of int
 
 and affect = {
   affect_type : affect_affect_type;
   name : string option;
   description : string option;
-  size_cost : int32 option;
-  reqsize : int32 option;
-  range : int32 option;
+  size_cost : int option;
+  reqsize : int option;
+  range : int option;
 }
 
 and affect_mutable = {
   mutable affect_type : affect_affect_type;
   mutable name : string option;
   mutable description : string option;
-  mutable size_cost : int32 option;
-  mutable reqsize : int32 option;
-  mutable range : int32 option;
+  mutable size_cost : int option;
+  mutable reqsize : int option;
+  mutable range : int option;
 }
 
 type player_id =
@@ -31,32 +31,31 @@ type player_id =
 
 type program_id = {
   player_id : player_id option;
-  unit_id : int32 option;
+  unit_id : int option;
 }
 
 and program_id_mutable = {
   mutable player_id : player_id option;
-  mutable unit_id : int32 option;
+  mutable unit_id : int option;
 }
 
 type position = {
-  x : int32 option;
-  y : int32 option;
+  x : int option;
+  y : int option;
 }
 
 and position_mutable = {
-  mutable x : int32 option;
-  mutable y : int32 option;
+  mutable x : int option;
+  mutable y : int option;
 }
 
 type program = {
   name : string option;
   description : string option;
   affects : affect list;
-  move_rate : int32 option;
-  max_size : int32 option;
-  unit_id : program_id option;
-  player_id : int32 option;
+  move_rate : int option;
+  max_size : int option;
+  program_id : program_id option;
   sectors : position list;
 }
 
@@ -64,48 +63,47 @@ and program_mutable = {
   mutable name : string option;
   mutable description : string option;
   mutable affects : affect list;
-  mutable move_rate : int32 option;
-  mutable max_size : int32 option;
-  mutable unit_id : program_id option;
-  mutable player_id : int32 option;
+  mutable move_rate : int option;
+  mutable max_size : int option;
+  mutable program_id : program_id option;
   mutable sectors : position list;
 }
 
 type cell = {
   passable : bool option;
   unit_id : program_id option;
-  credit_value : int32 option;
+  credit_value : int option;
 }
 
 and cell_mutable = {
   mutable passable : bool option;
   mutable unit_id : program_id option;
-  mutable credit_value : int32 option;
+  mutable credit_value : int option;
 }
 
 type grid = {
-  width : int32 option;
-  height : int32 option;
+  width : int option;
+  height : int option;
   cells : cell list;
 }
 
 and grid_mutable = {
-  mutable width : int32 option;
-  mutable height : int32 option;
+  mutable width : int option;
+  mutable height : int option;
   mutable cells : cell list;
 }
 
 type game_state = {
   current_player : player_id option;
   current_unit : program_id option;
-  board : grid option;
+  grid : grid option;
   game_over : bool option;
 }
 
 and game_state_mutable = {
   mutable current_player : player_id option;
   mutable current_unit : program_id option;
-  mutable board : grid option;
+  mutable grid : grid option;
   mutable game_over : bool option;
 }
 
@@ -123,12 +121,12 @@ and starting_state_mutable = {
 
 type player_configuration_program_selection = {
   pos : position option;
-  selection_number : int32 option;
+  selection_number : int option;
 }
 
 and player_configuration_program_selection_mutable = {
   mutable pos : position option;
-  mutable selection_number : int32 option;
+  mutable selection_number : int option;
 }
 
 type player_configuration = {
@@ -193,15 +191,15 @@ and enemy_action_mutable = {
   mutable game_state : game_state option;
 }
 
-let rec default_affect_affect_type () : affect_affect_type = Damage (0l)
+let rec default_affect_affect_type () : affect_affect_type = Damage (0)
 
 and default_affect 
-  ?affect_type:((affect_type:affect_affect_type) = Damage (0l))
+  ?affect_type:((affect_type:affect_affect_type) = Damage (0))
   ?name:((name:string option) = None)
   ?description:((description:string option) = None)
-  ?size_cost:((size_cost:int32 option) = None)
-  ?reqsize:((reqsize:int32 option) = None)
-  ?range:((range:int32 option) = None)
+  ?size_cost:((size_cost:int option) = None)
+  ?reqsize:((reqsize:int option) = None)
+  ?range:((range:int option) = None)
   () : affect  = {
   affect_type;
   name;
@@ -212,7 +210,7 @@ and default_affect
 }
 
 and default_affect_mutable () : affect_mutable = {
-  affect_type = Damage (0l);
+  affect_type = Damage (0);
   name = None;
   description = None;
   size_cost = None;
@@ -224,7 +222,7 @@ let rec default_player_id () = (Player:player_id)
 
 let rec default_program_id 
   ?player_id:((player_id:player_id option) = None)
-  ?unit_id:((unit_id:int32 option) = None)
+  ?unit_id:((unit_id:int option) = None)
   () : program_id  = {
   player_id;
   unit_id;
@@ -236,8 +234,8 @@ and default_program_id_mutable () : program_id_mutable = {
 }
 
 let rec default_position 
-  ?x:((x:int32 option) = None)
-  ?y:((y:int32 option) = None)
+  ?x:((x:int option) = None)
+  ?y:((y:int option) = None)
   () : position  = {
   x;
   y;
@@ -252,10 +250,9 @@ let rec default_program
   ?name:((name:string option) = None)
   ?description:((description:string option) = None)
   ?affects:((affects:affect list) = [])
-  ?move_rate:((move_rate:int32 option) = None)
-  ?max_size:((max_size:int32 option) = None)
-  ?unit_id:((unit_id:program_id option) = None)
-  ?player_id:((player_id:int32 option) = None)
+  ?move_rate:((move_rate:int option) = None)
+  ?max_size:((max_size:int option) = None)
+  ?program_id:((program_id:program_id option) = None)
   ?sectors:((sectors:position list) = [])
   () : program  = {
   name;
@@ -263,8 +260,7 @@ let rec default_program
   affects;
   move_rate;
   max_size;
-  unit_id;
-  player_id;
+  program_id;
   sectors;
 }
 
@@ -274,15 +270,14 @@ and default_program_mutable () : program_mutable = {
   affects = [];
   move_rate = None;
   max_size = None;
-  unit_id = None;
-  player_id = None;
+  program_id = None;
   sectors = [];
 }
 
 let rec default_cell 
   ?passable:((passable:bool option) = Some (true))
   ?unit_id:((unit_id:program_id option) = None)
-  ?credit_value:((credit_value:int32 option) = None)
+  ?credit_value:((credit_value:int option) = None)
   () : cell  = {
   passable;
   unit_id;
@@ -296,8 +291,8 @@ and default_cell_mutable () : cell_mutable = {
 }
 
 let rec default_grid 
-  ?width:((width:int32 option) = Some (16l))
-  ?height:((height:int32 option) = Some (13l))
+  ?width:((width:int option) = Some (16))
+  ?height:((height:int option) = Some (13))
   ?cells:((cells:cell list) = [])
   () : grid  = {
   width;
@@ -306,27 +301,27 @@ let rec default_grid
 }
 
 and default_grid_mutable () : grid_mutable = {
-  width = Some (16l);
-  height = Some (13l);
+  width = Some (16);
+  height = Some (13);
   cells = [];
 }
 
 let rec default_game_state 
   ?current_player:((current_player:player_id option) = None)
   ?current_unit:((current_unit:program_id option) = None)
-  ?board:((board:grid option) = None)
+  ?grid:((grid:grid option) = None)
   ?game_over:((game_over:bool option) = None)
   () : game_state  = {
   current_player;
   current_unit;
-  board;
+  grid;
   game_over;
 }
 
 and default_game_state_mutable () : game_state_mutable = {
   current_player = None;
   current_unit = None;
-  board = None;
+  grid = None;
   game_over = None;
 }
 
@@ -348,7 +343,7 @@ and default_starting_state_mutable () : starting_state_mutable = {
 
 let rec default_player_configuration_program_selection 
   ?pos:((pos:position option) = None)
-  ?selection_number:((selection_number:int32 option) = None)
+  ?selection_number:((selection_number:int option) = None)
   () : player_configuration_program_selection  = {
   pos;
   selection_number;
@@ -437,11 +432,11 @@ let rec decode_affect_affect_type d =
   let rec loop () = 
     let ret:affect_affect_type = match Pbrt.Decoder.key d with
       | None -> failwith "None of the known key is found"
-      | Some (10, _) -> Damage (Pbrt.Decoder.int32_as_varint d)
-      | Some (11, _) -> Healing (Pbrt.Decoder.int32_as_varint d)
+      | Some (10, _) -> Damage (Pbrt.Decoder.int_as_varint d)
+      | Some (11, _) -> Healing (Pbrt.Decoder.int_as_varint d)
       | Some (12, _) -> Floor (Pbrt.Decoder.bool d)
-      | Some (13, _) -> Stepcap (Pbrt.Decoder.int32_as_varint d)
-      | Some (14, _) -> Sizecap (Pbrt.Decoder.int32_as_varint d)
+      | Some (13, _) -> Stepcap (Pbrt.Decoder.int_as_varint d)
+      | Some (14, _) -> Sizecap (Pbrt.Decoder.int_as_varint d)
       | Some (n, payload_kind) -> (
         Pbrt.Decoder.skip d payload_kind; 
         loop () 
@@ -458,14 +453,14 @@ and decode_affect d =
     | None -> (
     )
     | Some (10, Pbrt.Varint) -> (
-      v.affect_type <- Damage (Pbrt.Decoder.int32_as_varint d);
+      v.affect_type <- Damage (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (10, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(affect), field(10)", pk))
     )
     | Some (11, Pbrt.Varint) -> (
-      v.affect_type <- Healing (Pbrt.Decoder.int32_as_varint d);
+      v.affect_type <- Healing (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (11, pk) -> raise (
@@ -479,14 +474,14 @@ and decode_affect d =
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(affect), field(12)", pk))
     )
     | Some (13, Pbrt.Varint) -> (
-      v.affect_type <- Stepcap (Pbrt.Decoder.int32_as_varint d);
+      v.affect_type <- Stepcap (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (13, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(affect), field(13)", pk))
     )
     | Some (14, Pbrt.Varint) -> (
-      v.affect_type <- Sizecap (Pbrt.Decoder.int32_as_varint d);
+      v.affect_type <- Sizecap (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (14, pk) -> raise (
@@ -507,21 +502,21 @@ and decode_affect d =
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(affect), field(2)", pk))
     )
     | Some (3, Pbrt.Varint) -> (
-      v.size_cost <- Some (Pbrt.Decoder.int32_as_zigzag d);
+      v.size_cost <- Some (Pbrt.Decoder.int_as_zigzag d);
       loop ()
     )
     | Some (3, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(affect), field(3)", pk))
     )
     | Some (4, Pbrt.Varint) -> (
-      v.reqsize <- Some (Pbrt.Decoder.int32_as_varint d);
+      v.reqsize <- Some (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (4, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(affect), field(4)", pk))
     )
     | Some (5, Pbrt.Varint) -> (
-      v.range <- Some (Pbrt.Decoder.int32_as_varint d);
+      v.range <- Some (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (5, pk) -> raise (
@@ -553,7 +548,7 @@ let rec decode_program_id d =
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(program_id), field(1)", pk))
     )
     | Some (2, Pbrt.Varint) -> (
-      v.unit_id <- Some (Pbrt.Decoder.int32_as_varint d);
+      v.unit_id <- Some (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (2, pk) -> raise (
@@ -572,14 +567,14 @@ let rec decode_position d =
     | None -> (
     )
     | Some (1, Pbrt.Varint) -> (
-      v.x <- Some (Pbrt.Decoder.int32_as_varint d);
+      v.x <- Some (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (1, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(position), field(1)", pk))
     )
     | Some (2, Pbrt.Varint) -> (
-      v.y <- Some (Pbrt.Decoder.int32_as_varint d);
+      v.y <- Some (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (2, pk) -> raise (
@@ -621,39 +616,32 @@ let rec decode_program d =
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(program), field(3)", pk))
     )
     | Some (4, Pbrt.Varint) -> (
-      v.move_rate <- Some (Pbrt.Decoder.int32_as_varint d);
+      v.move_rate <- Some (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (4, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(program), field(4)", pk))
     )
     | Some (5, Pbrt.Varint) -> (
-      v.max_size <- Some (Pbrt.Decoder.int32_as_varint d);
+      v.max_size <- Some (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (5, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(program), field(5)", pk))
     )
     | Some (6, Pbrt.Bytes) -> (
-      v.unit_id <- Some (decode_program_id (Pbrt.Decoder.nested d));
+      v.program_id <- Some (decode_program_id (Pbrt.Decoder.nested d));
       loop ()
     )
     | Some (6, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(program), field(6)", pk))
     )
-    | Some (7, Pbrt.Varint) -> (
-      v.player_id <- Some (Pbrt.Decoder.int32_as_varint d);
+    | Some (7, Pbrt.Bytes) -> (
+      v.sectors <- (decode_position (Pbrt.Decoder.nested d)) :: v.sectors;
       loop ()
     )
     | Some (7, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(program), field(7)", pk))
-    )
-    | Some (8, Pbrt.Bytes) -> (
-      v.sectors <- (decode_position (Pbrt.Decoder.nested d)) :: v.sectors;
-      loop ()
-    )
-    | Some (8, pk) -> raise (
-      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(program), field(8)", pk))
     )
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind; loop ()
   in
@@ -682,7 +670,7 @@ let rec decode_cell d =
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(cell), field(2)", pk))
     )
     | Some (3, Pbrt.Varint) -> (
-      v.credit_value <- Some (Pbrt.Decoder.int32_as_varint d);
+      v.credit_value <- Some (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (3, pk) -> raise (
@@ -702,14 +690,14 @@ let rec decode_grid d =
       v.cells <- List.rev v.cells;
     )
     | Some (1, Pbrt.Varint) -> (
-      v.width <- Some (Pbrt.Decoder.int32_as_varint d);
+      v.width <- Some (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (1, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(grid), field(1)", pk))
     )
     | Some (2, Pbrt.Varint) -> (
-      v.height <- Some (Pbrt.Decoder.int32_as_varint d);
+      v.height <- Some (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (2, pk) -> raise (
@@ -749,7 +737,7 @@ let rec decode_game_state d =
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(game_state), field(2)", pk))
     )
     | Some (3, Pbrt.Bytes) -> (
-      v.board <- Some (decode_grid (Pbrt.Decoder.nested d));
+      v.grid <- Some (decode_grid (Pbrt.Decoder.nested d));
       loop ()
     )
     | Some (3, pk) -> raise (
@@ -817,7 +805,7 @@ let rec decode_player_configuration_program_selection d =
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(player_configuration_program_selection), field(1)", pk))
     )
     | Some (2, Pbrt.Varint) -> (
-      v.selection_number <- Some (Pbrt.Decoder.int32_as_varint d);
+      v.selection_number <- Some (Pbrt.Decoder.int_as_varint d);
       loop ()
     )
     | Some (2, pk) -> raise (
@@ -993,11 +981,11 @@ let rec encode_affect_affect_type (v:affect_affect_type) encoder =
   match v with
   | Damage x -> (
     Pbrt.Encoder.key (10, Pbrt.Varint) encoder; 
-    Pbrt.Encoder.int32_as_varint x encoder;
+    Pbrt.Encoder.int_as_varint x encoder;
   )
   | Healing x -> (
     Pbrt.Encoder.key (11, Pbrt.Varint) encoder; 
-    Pbrt.Encoder.int32_as_varint x encoder;
+    Pbrt.Encoder.int_as_varint x encoder;
   )
   | Floor x -> (
     Pbrt.Encoder.key (12, Pbrt.Varint) encoder; 
@@ -1005,11 +993,11 @@ let rec encode_affect_affect_type (v:affect_affect_type) encoder =
   )
   | Stepcap x -> (
     Pbrt.Encoder.key (13, Pbrt.Varint) encoder; 
-    Pbrt.Encoder.int32_as_varint x encoder;
+    Pbrt.Encoder.int_as_varint x encoder;
   )
   | Sizecap x -> (
     Pbrt.Encoder.key (14, Pbrt.Varint) encoder; 
-    Pbrt.Encoder.int32_as_varint x encoder;
+    Pbrt.Encoder.int_as_varint x encoder;
   )
 
 and encode_affect (v:affect) encoder = 
@@ -1017,11 +1005,11 @@ and encode_affect (v:affect) encoder =
     match v.affect_type with
     | Damage x -> (
       Pbrt.Encoder.key (10, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | Healing x -> (
       Pbrt.Encoder.key (11, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | Floor x -> (
       Pbrt.Encoder.key (12, Pbrt.Varint) encoder; 
@@ -1029,11 +1017,11 @@ and encode_affect (v:affect) encoder =
     )
     | Stepcap x -> (
       Pbrt.Encoder.key (13, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | Sizecap x -> (
       Pbrt.Encoder.key (14, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
   );
   (
@@ -1056,7 +1044,7 @@ and encode_affect (v:affect) encoder =
     match v.size_cost with 
     | Some x -> (
       Pbrt.Encoder.key (3, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_zigzag x encoder;
+      Pbrt.Encoder.int_as_zigzag x encoder;
     )
     | None -> ();
   );
@@ -1064,7 +1052,7 @@ and encode_affect (v:affect) encoder =
     match v.reqsize with 
     | Some x -> (
       Pbrt.Encoder.key (4, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | None -> ();
   );
@@ -1072,7 +1060,7 @@ and encode_affect (v:affect) encoder =
     match v.range with 
     | Some x -> (
       Pbrt.Encoder.key (5, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | None -> ();
   );
@@ -1096,7 +1084,7 @@ let rec encode_program_id (v:program_id) encoder =
     match v.unit_id with 
     | Some x -> (
       Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | None -> ();
   );
@@ -1107,7 +1095,7 @@ let rec encode_position (v:position) encoder =
     match v.x with 
     | Some x -> (
       Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | None -> ();
   );
@@ -1115,7 +1103,7 @@ let rec encode_position (v:position) encoder =
     match v.y with 
     | Some x -> (
       Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | None -> ();
   );
@@ -1146,7 +1134,7 @@ let rec encode_program (v:program) encoder =
     match v.move_rate with 
     | Some x -> (
       Pbrt.Encoder.key (4, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | None -> ();
   );
@@ -1154,28 +1142,20 @@ let rec encode_program (v:program) encoder =
     match v.max_size with 
     | Some x -> (
       Pbrt.Encoder.key (5, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | None -> ();
   );
   (
-    match v.unit_id with 
+    match v.program_id with 
     | Some x -> (
       Pbrt.Encoder.key (6, Pbrt.Bytes) encoder; 
       Pbrt.Encoder.nested (encode_program_id x) encoder;
     )
     | None -> ();
   );
-  (
-    match v.player_id with 
-    | Some x -> (
-      Pbrt.Encoder.key (7, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
-    )
-    | None -> ();
-  );
   List.iter (fun x -> 
-    Pbrt.Encoder.key (8, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.key (7, Pbrt.Bytes) encoder; 
     Pbrt.Encoder.nested (encode_position x) encoder;
   ) v.sectors;
   ()
@@ -1201,7 +1181,7 @@ let rec encode_cell (v:cell) encoder =
     match v.credit_value with 
     | Some x -> (
       Pbrt.Encoder.key (3, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | None -> ();
   );
@@ -1212,7 +1192,7 @@ let rec encode_grid (v:grid) encoder =
     match v.width with 
     | Some x -> (
       Pbrt.Encoder.key (1, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | None -> ();
   );
@@ -1220,7 +1200,7 @@ let rec encode_grid (v:grid) encoder =
     match v.height with 
     | Some x -> (
       Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | None -> ();
   );
@@ -1248,7 +1228,7 @@ let rec encode_game_state (v:game_state) encoder =
     | None -> ();
   );
   (
-    match v.board with 
+    match v.grid with 
     | Some x -> (
       Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
       Pbrt.Encoder.nested (encode_grid x) encoder;
@@ -1297,7 +1277,7 @@ let rec encode_player_configuration_program_selection (v:player_configuration_pr
     match v.selection_number with 
     | Some x -> (
       Pbrt.Encoder.key (2, Pbrt.Varint) encoder; 
-      Pbrt.Encoder.int32_as_varint x encoder;
+      Pbrt.Encoder.int_as_varint x encoder;
     )
     | None -> ();
   );
@@ -1418,11 +1398,11 @@ let rec encode_enemy_action (v:enemy_action) encoder =
 
 let rec pp_affect_affect_type fmt (v:affect_affect_type) =
   match v with
-  | Damage x -> Format.fprintf fmt "@[Damage(%a)@]" Pbrt.Pp.pp_int32 x
-  | Healing x -> Format.fprintf fmt "@[Healing(%a)@]" Pbrt.Pp.pp_int32 x
+  | Damage x -> Format.fprintf fmt "@[Damage(%a)@]" Pbrt.Pp.pp_int x
+  | Healing x -> Format.fprintf fmt "@[Healing(%a)@]" Pbrt.Pp.pp_int x
   | Floor x -> Format.fprintf fmt "@[Floor(%a)@]" Pbrt.Pp.pp_bool x
-  | Stepcap x -> Format.fprintf fmt "@[Stepcap(%a)@]" Pbrt.Pp.pp_int32 x
-  | Sizecap x -> Format.fprintf fmt "@[Sizecap(%a)@]" Pbrt.Pp.pp_int32 x
+  | Stepcap x -> Format.fprintf fmt "@[Stepcap(%a)@]" Pbrt.Pp.pp_int x
+  | Sizecap x -> Format.fprintf fmt "@[Sizecap(%a)@]" Pbrt.Pp.pp_int x
 
 and pp_affect fmt (v:affect) = 
   let pp_i fmt () =
@@ -1430,9 +1410,9 @@ and pp_affect fmt (v:affect) =
     Pbrt.Pp.pp_record_field "affect_type" pp_affect_affect_type fmt v.affect_type;
     Pbrt.Pp.pp_record_field "name" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.name;
     Pbrt.Pp.pp_record_field "description" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.description;
-    Pbrt.Pp.pp_record_field "size_cost" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.size_cost;
-    Pbrt.Pp.pp_record_field "reqsize" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.reqsize;
-    Pbrt.Pp.pp_record_field "range" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.range;
+    Pbrt.Pp.pp_record_field "size_cost" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.size_cost;
+    Pbrt.Pp.pp_record_field "reqsize" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.reqsize;
+    Pbrt.Pp.pp_record_field "range" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.range;
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
@@ -1446,7 +1426,7 @@ let rec pp_program_id fmt (v:program_id) =
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
     Pbrt.Pp.pp_record_field "player_id" (Pbrt.Pp.pp_option pp_player_id) fmt v.player_id;
-    Pbrt.Pp.pp_record_field "unit_id" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.unit_id;
+    Pbrt.Pp.pp_record_field "unit_id" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.unit_id;
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
@@ -1454,8 +1434,8 @@ let rec pp_program_id fmt (v:program_id) =
 let rec pp_position fmt (v:position) = 
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
-    Pbrt.Pp.pp_record_field "x" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.x;
-    Pbrt.Pp.pp_record_field "y" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.y;
+    Pbrt.Pp.pp_record_field "x" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.x;
+    Pbrt.Pp.pp_record_field "y" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.y;
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
@@ -1466,10 +1446,9 @@ let rec pp_program fmt (v:program) =
     Pbrt.Pp.pp_record_field "name" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.name;
     Pbrt.Pp.pp_record_field "description" (Pbrt.Pp.pp_option Pbrt.Pp.pp_string) fmt v.description;
     Pbrt.Pp.pp_record_field "affects" (Pbrt.Pp.pp_list pp_affect) fmt v.affects;
-    Pbrt.Pp.pp_record_field "move_rate" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.move_rate;
-    Pbrt.Pp.pp_record_field "max_size" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.max_size;
-    Pbrt.Pp.pp_record_field "unit_id" (Pbrt.Pp.pp_option pp_program_id) fmt v.unit_id;
-    Pbrt.Pp.pp_record_field "player_id" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.player_id;
+    Pbrt.Pp.pp_record_field "move_rate" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.move_rate;
+    Pbrt.Pp.pp_record_field "max_size" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.max_size;
+    Pbrt.Pp.pp_record_field "program_id" (Pbrt.Pp.pp_option pp_program_id) fmt v.program_id;
     Pbrt.Pp.pp_record_field "sectors" (Pbrt.Pp.pp_list pp_position) fmt v.sectors;
     Format.pp_close_box fmt ()
   in
@@ -1480,7 +1459,7 @@ let rec pp_cell fmt (v:cell) =
     Format.pp_open_vbox fmt 1;
     Pbrt.Pp.pp_record_field "passable" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.passable;
     Pbrt.Pp.pp_record_field "unit_id" (Pbrt.Pp.pp_option pp_program_id) fmt v.unit_id;
-    Pbrt.Pp.pp_record_field "credit_value" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.credit_value;
+    Pbrt.Pp.pp_record_field "credit_value" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.credit_value;
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
@@ -1488,8 +1467,8 @@ let rec pp_cell fmt (v:cell) =
 let rec pp_grid fmt (v:grid) = 
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
-    Pbrt.Pp.pp_record_field "width" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.width;
-    Pbrt.Pp.pp_record_field "height" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.height;
+    Pbrt.Pp.pp_record_field "width" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.width;
+    Pbrt.Pp.pp_record_field "height" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.height;
     Pbrt.Pp.pp_record_field "cells" (Pbrt.Pp.pp_list pp_cell) fmt v.cells;
     Format.pp_close_box fmt ()
   in
@@ -1500,7 +1479,7 @@ let rec pp_game_state fmt (v:game_state) =
     Format.pp_open_vbox fmt 1;
     Pbrt.Pp.pp_record_field "current_player" (Pbrt.Pp.pp_option pp_player_id) fmt v.current_player;
     Pbrt.Pp.pp_record_field "current_unit" (Pbrt.Pp.pp_option pp_program_id) fmt v.current_unit;
-    Pbrt.Pp.pp_record_field "board" (Pbrt.Pp.pp_option pp_grid) fmt v.board;
+    Pbrt.Pp.pp_record_field "grid" (Pbrt.Pp.pp_option pp_grid) fmt v.grid;
     Pbrt.Pp.pp_record_field "game_over" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.game_over;
     Format.pp_close_box fmt ()
   in
@@ -1520,7 +1499,7 @@ let rec pp_player_configuration_program_selection fmt (v:player_configuration_pr
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
     Pbrt.Pp.pp_record_field "pos" (Pbrt.Pp.pp_option pp_position) fmt v.pos;
-    Pbrt.Pp.pp_record_field "selection_number" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int32) fmt v.selection_number;
+    Pbrt.Pp.pp_record_field "selection_number" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.selection_number;
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()

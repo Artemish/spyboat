@@ -4,19 +4,19 @@
 (** {2 Types} *)
 
 type affect_affect_type =
-  | Damage of int32
-  | Healing of int32
+  | Damage of int
+  | Healing of int
   | Floor of bool
-  | Stepcap of int32
-  | Sizecap of int32
+  | Stepcap of int
+  | Sizecap of int
 
 and affect = {
   affect_type : affect_affect_type;
   name : string option;
   description : string option;
-  size_cost : int32 option;
-  reqsize : int32 option;
-  range : int32 option;
+  size_cost : int option;
+  reqsize : int option;
+  range : int option;
 }
 
 type player_id =
@@ -25,41 +25,40 @@ type player_id =
 
 type program_id = {
   player_id : player_id option;
-  unit_id : int32 option;
+  unit_id : int option;
 }
 
 type position = {
-  x : int32 option;
-  y : int32 option;
+  x : int option;
+  y : int option;
 }
 
 type program = {
   name : string option;
   description : string option;
   affects : affect list;
-  move_rate : int32 option;
-  max_size : int32 option;
-  unit_id : program_id option;
-  player_id : int32 option;
+  move_rate : int option;
+  max_size : int option;
+  program_id : program_id option;
   sectors : position list;
 }
 
 type cell = {
   passable : bool option;
   unit_id : program_id option;
-  credit_value : int32 option;
+  credit_value : int option;
 }
 
 type grid = {
-  width : int32 option;
-  height : int32 option;
+  width : int option;
+  height : int option;
   cells : cell list;
 }
 
 type game_state = {
   current_player : player_id option;
   current_unit : program_id option;
-  board : grid option;
+  grid : grid option;
   game_over : bool option;
 }
 
@@ -71,7 +70,7 @@ type starting_state = {
 
 type player_configuration_program_selection = {
   pos : position option;
-  selection_number : int32 option;
+  selection_number : int option;
 }
 
 type player_configuration = {
@@ -118,9 +117,9 @@ val default_affect :
   ?affect_type:affect_affect_type ->
   ?name:string option ->
   ?description:string option ->
-  ?size_cost:int32 option ->
-  ?reqsize:int32 option ->
-  ?range:int32 option ->
+  ?size_cost:int option ->
+  ?reqsize:int option ->
+  ?range:int option ->
   unit ->
   affect
 (** [default_affect ()] is the default value for type [affect] *)
@@ -130,14 +129,14 @@ val default_player_id : unit -> player_id
 
 val default_program_id : 
   ?player_id:player_id option ->
-  ?unit_id:int32 option ->
+  ?unit_id:int option ->
   unit ->
   program_id
 (** [default_program_id ()] is the default value for type [program_id] *)
 
 val default_position : 
-  ?x:int32 option ->
-  ?y:int32 option ->
+  ?x:int option ->
+  ?y:int option ->
   unit ->
   position
 (** [default_position ()] is the default value for type [position] *)
@@ -146,10 +145,9 @@ val default_program :
   ?name:string option ->
   ?description:string option ->
   ?affects:affect list ->
-  ?move_rate:int32 option ->
-  ?max_size:int32 option ->
-  ?unit_id:program_id option ->
-  ?player_id:int32 option ->
+  ?move_rate:int option ->
+  ?max_size:int option ->
+  ?program_id:program_id option ->
   ?sectors:position list ->
   unit ->
   program
@@ -158,14 +156,14 @@ val default_program :
 val default_cell : 
   ?passable:bool option ->
   ?unit_id:program_id option ->
-  ?credit_value:int32 option ->
+  ?credit_value:int option ->
   unit ->
   cell
 (** [default_cell ()] is the default value for type [cell] *)
 
 val default_grid : 
-  ?width:int32 option ->
-  ?height:int32 option ->
+  ?width:int option ->
+  ?height:int option ->
   ?cells:cell list ->
   unit ->
   grid
@@ -174,7 +172,7 @@ val default_grid :
 val default_game_state : 
   ?current_player:player_id option ->
   ?current_unit:program_id option ->
-  ?board:grid option ->
+  ?grid:grid option ->
   ?game_over:bool option ->
   unit ->
   game_state
@@ -190,7 +188,7 @@ val default_starting_state :
 
 val default_player_configuration_program_selection : 
   ?pos:position option ->
-  ?selection_number:int32 option ->
+  ?selection_number:int option ->
   unit ->
   player_configuration_program_selection
 (** [default_player_configuration_program_selection ()] is the default value for type [player_configuration_program_selection] *)
