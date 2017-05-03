@@ -38,9 +38,8 @@ message Program {
   repeated Affect affects = 3;
   optional uint32 move_rate = 4;
   optional uint32 max_size = 5;
-  optional ProgramId unit_id = 6;
-  optional uint32 player_id = 7;
-  repeated Position sectors = 8;
+  optional ProgramId program_id = 6;
+  repeated Position sectors = 7;
 }
 
 message Cell {
@@ -58,7 +57,7 @@ message Grid {
 message GameState {
   optional PlayerId current_player = 1;
   optional ProgramId current_unit = 2;
-  optional Grid board = 3;
+  optional Grid grid = 3;
   optional bool game_over = 4;
 }
 
