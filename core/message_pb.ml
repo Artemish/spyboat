@@ -108,13 +108,13 @@ and game_state_mutable = {
 }
 
 type starting_state = {
-  board : grid option;
+  grid : grid option;
   templates : program list;
   starts : position list;
 }
 
 and starting_state_mutable = {
-  mutable board : grid option;
+  mutable grid : grid option;
   mutable templates : program list;
   mutable starts : position list;
 }
@@ -326,17 +326,17 @@ and default_game_state_mutable () : game_state_mutable = {
 }
 
 let rec default_starting_state 
-  ?board:((board:grid option) = None)
+  ?grid:((grid:grid option) = None)
   ?templates:((templates:program list) = [])
   ?starts:((starts:position list) = [])
   () : starting_state  = {
-  board;
+  grid;
   templates;
   starts;
 }
 
 and default_starting_state_mutable () : starting_state_mutable = {
-  board = None;
+  grid = None;
   templates = [];
   starts = [];
 }
@@ -765,7 +765,7 @@ let rec decode_starting_state d =
       v.templates <- List.rev v.templates;
     )
     | Some (1, Pbrt.Bytes) -> (
-      v.board <- Some (decode_grid (Pbrt.Decoder.nested d));
+      v.grid <- Some (decode_grid (Pbrt.Decoder.nested d));
       loop ()
     )
     | Some (1, pk) -> raise (
@@ -1247,7 +1247,7 @@ let rec encode_game_state (v:game_state) encoder =
 
 let rec encode_starting_state (v:starting_state) encoder = 
   (
-    match v.board with 
+    match v.grid with 
     | Some x -> (
       Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
       Pbrt.Encoder.nested (encode_grid x) encoder;
@@ -1488,7 +1488,7 @@ let rec pp_game_state fmt (v:game_state) =
 let rec pp_starting_state fmt (v:starting_state) = 
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
-    Pbrt.Pp.pp_record_field "board" (Pbrt.Pp.pp_option pp_grid) fmt v.board;
+    Pbrt.Pp.pp_record_field "grid" (Pbrt.Pp.pp_option pp_grid) fmt v.grid;
     Pbrt.Pp.pp_record_field "templates" (Pbrt.Pp.pp_list pp_program) fmt v.templates;
     Pbrt.Pp.pp_record_field "starts" (Pbrt.Pp.pp_list pp_position) fmt v.starts;
     Format.pp_close_box fmt ()

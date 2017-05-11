@@ -18,3 +18,6 @@ build: setup.data setup.ml
 clean:
 	ocamlbuild -clean
 	rm -f setup.data setup.log
+
+proto: message.proto
+	ocaml-protoc -ml_out core -int32_type int_t message.proto

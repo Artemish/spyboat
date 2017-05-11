@@ -62,7 +62,7 @@ message GameState {
 }
 
 message StartingState {
-  optional Grid board = 1; 
+  optional Grid grid = 1; 
 
   // Program templates is a numbered list of units,
   // a player's selection is an index in this list 

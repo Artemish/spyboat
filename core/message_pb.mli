@@ -63,7 +63,7 @@ type game_state = {
 }
 
 type starting_state = {
-  board : grid option;
+  grid : grid option;
   templates : program list;
   starts : position list;
 }
@@ -179,7 +179,7 @@ val default_game_state :
 (** [default_game_state ()] is the default value for type [game_state] *)
 
 val default_starting_state : 
-  ?board:grid option ->
+  ?grid:grid option ->
   ?templates:program list ->
   ?starts:position list ->
   unit ->
