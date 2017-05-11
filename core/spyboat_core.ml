@@ -1,23 +1,27 @@
-module T = Spyboat_templates
-module O = Spyboat_objects
-
 open Core.Std 
+open Option
+open Message_pb
 
-let get_map () = 
-  let affects = T.affects_from_file "res/affects.json" in
-  let units = T.units_from_file "res/units.json" affects in
-  let map = T.map_from_file "res/demo-level.json" units affects in
-  (affects, units, map)
+let get_starting_state () = 
+  let affects = Spyboat_templates.affects_from_file "res/affects.json" in
+  let units = Spyboat_templates.units_from_file "res/units.json" affects in
+  Spyboat_templates.map_from_file "res/demo-level.json" 
 
-let initialize_board ~affects ~templates ~map ~choices = 
-  let module M = O.Map in
-  let module C = O.Cell in
-  let module U = O.UnitState in
-  let module T = O.UnitTemplate in
+let initialize_board starting_state player_configuration =
 
-  let {M.width; M.height; M.cells; M.starts; M.enemy_units} = map in
+  let {grid; templates; starts; affects; enemies} = starting_state in
 
-  let to_unitstate: (O.position * string) -> O.UnitState.t =
+  let {selections} = player_configuration in
+
+  let make_unit selection = 
+    let {position; selection_number} = selection in
+    position >>= (fun pos -> selection_number >>= (fun select ->
+      let template = List.nth_exn select templates in
+      let program_id = Some(Spyboat_templates.next_id Player) in
+      let sectors = [pos] in
+      return {template with program_id; sectors}))
+
+  let to_unitstate: (position * string) -> O.UnitState.t =
     fun (pos, unit_name) ->
       let () =
         match (List.mem starts pos) with
