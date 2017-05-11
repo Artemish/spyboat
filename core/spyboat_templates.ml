@@ -108,13 +108,16 @@ let map_from_file path programs affects =
   let height = js |> member "height" |> to_int in
   let spawns = js |> member "spawn-points" |> to_list in
   let enemies = js |> member "units" |> to_list in
-  let cell_list = js |> member "cells" |> to_list in
+  let cell_list = List.map ~f:to_int (js |> member "cells" |> to_list) in
 
-  let make_cell i = default_cell ~passable(List.nth_exn cell_list i = 1) () in
+  let make_cell i = default_cell ~passable:(Some(List.nth_exn cell_list i = 1)) () in
   let cells = List.map ~f:make_cell  (List.range 0 (width * height)) in
 
+  let width, height = Some(width), Some(height) in
+
+  let grid = Some(default_grid ~width ~height ~cells ()) in
   let starts = to_pos_list spawns in
 
   let enemy_units = List.map ~f:get_unit enemies in
 
-  create ~width ~height ~cells ~starts ~enemy_units
+  default_starting_state ~templates:programs ~grid ()
