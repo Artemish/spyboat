@@ -70,11 +70,13 @@ message StartingState {
 
   // A list of positions the player can place units
   repeated Position starts = 3;
+  repeated Affect affects = 4;
+  repeated Program enemies = 5;
 }
 
 message PlayerConfiguration {
   message ProgramSelection {
-    optional Position pos = 1;
+    optional Position position = 1;
     optional uint32 selection_number = 2;
   }
 

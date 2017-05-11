@@ -111,12 +111,16 @@ type starting_state = {
   grid : grid option;
   templates : program list;
   starts : position list;
+  affects : affect list;
+  enemies : program list;
 }
 
 and starting_state_mutable = {
   mutable grid : grid option;
   mutable templates : program list;
   mutable starts : position list;
+  mutable affects : affect list;
+  mutable enemies : program list;
 }
 
 type player_configuration_program_selection = {
@@ -329,16 +333,22 @@ let rec default_starting_state
   ?grid:((grid:grid option) = None)
   ?templates:((templates:program list) = [])
   ?starts:((starts:position list) = [])
+  ?affects:((affects:affect list) = [])
+  ?enemies:((enemies:program list) = [])
   () : starting_state  = {
   grid;
   templates;
   starts;
+  affects;
+  enemies;
 }
 
 and default_starting_state_mutable () : starting_state_mutable = {
   grid = None;
   templates = [];
   starts = [];
+  affects = [];
+  enemies = [];
 }
 
 let rec default_player_configuration_program_selection 
@@ -761,6 +771,8 @@ let rec decode_starting_state d =
   let rec loop () = 
     match Pbrt.Decoder.key d with
     | None -> (
+      v.enemies <- List.rev v.enemies;
+      v.affects <- List.rev v.affects;
       v.starts <- List.rev v.starts;
       v.templates <- List.rev v.templates;
     )
@@ -784,6 +796,20 @@ let rec decode_starting_state d =
     )
     | Some (3, pk) -> raise (
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(starting_state), field(3)", pk))
+    )
+    | Some (4, Pbrt.Bytes) -> (
+      v.affects <- (decode_affect (Pbrt.Decoder.nested d)) :: v.affects;
+      loop ()
+    )
+    | Some (4, pk) -> raise (
+      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(starting_state), field(4)", pk))
+    )
+    | Some (5, Pbrt.Bytes) -> (
+      v.enemies <- (decode_program (Pbrt.Decoder.nested d)) :: v.enemies;
+      loop ()
+    )
+    | Some (5, pk) -> raise (
+      Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(starting_state), field(5)", pk))
     )
     | Some (_, payload_kind) -> Pbrt.Decoder.skip d payload_kind; loop ()
   in
@@ -1262,6 +1288,14 @@ let rec encode_starting_state (v:starting_state) encoder =
     Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
     Pbrt.Encoder.nested (encode_position x) encoder;
   ) v.starts;
+  List.iter (fun x -> 
+    Pbrt.Encoder.key (4, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.nested (encode_affect x) encoder;
+  ) v.affects;
+  List.iter (fun x -> 
+    Pbrt.Encoder.key (5, Pbrt.Bytes) encoder; 
+    Pbrt.Encoder.nested (encode_program x) encoder;
+  ) v.enemies;
   ()
 
 let rec encode_player_configuration_program_selection (v:player_configuration_program_selection) encoder = 
@@ -1491,6 +1525,8 @@ let rec pp_starting_state fmt (v:starting_state) =
     Pbrt.Pp.pp_record_field "grid" (Pbrt.Pp.pp_option pp_grid) fmt v.grid;
     Pbrt.Pp.pp_record_field "templates" (Pbrt.Pp.pp_list pp_program) fmt v.templates;
     Pbrt.Pp.pp_record_field "starts" (Pbrt.Pp.pp_list pp_position) fmt v.starts;
+    Pbrt.Pp.pp_record_field "affects" (Pbrt.Pp.pp_list pp_affect) fmt v.affects;
+    Pbrt.Pp.pp_record_field "enemies" (Pbrt.Pp.pp_list pp_program) fmt v.enemies;
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()

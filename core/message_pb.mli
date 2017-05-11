@@ -66,6 +66,8 @@ type starting_state = {
   grid : grid option;
   templates : program list;
   starts : position list;
+  affects : affect list;
+  enemies : program list;
 }
 
 type player_configuration_program_selection = {
@@ -182,6 +184,8 @@ val default_starting_state :
   ?grid:grid option ->
   ?templates:program list ->
   ?starts:position list ->
+  ?affects:affect list ->
+  ?enemies:program list ->
   unit ->
   starting_state
 (** [default_starting_state ()] is the default value for type [starting_state] *)
