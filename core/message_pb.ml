@@ -71,26 +71,26 @@ and program_mutable = {
 
 type cell = {
   passable : bool option;
-  unit_id : program_id option;
+  program_id : program_id option;
   credit_value : int option;
 }
 
 and cell_mutable = {
   mutable passable : bool option;
-  mutable unit_id : program_id option;
+  mutable program_id : program_id option;
   mutable credit_value : int option;
 }
 
 type grid = {
   width : int option;
   height : int option;
-  cells : cell list;
+  cells : cell Pbrt.Repeated_field.t;
 }
 
 and grid_mutable = {
   mutable width : int option;
   mutable height : int option;
-  mutable cells : cell list;
+  cells : cell Pbrt.Repeated_field.t;
 }
 
 type game_state = {
@@ -124,12 +124,12 @@ and starting_state_mutable = {
 }
 
 type player_configuration_program_selection = {
-  pos : position option;
+  position : position option;
   selection_number : int option;
 }
 
 and player_configuration_program_selection_mutable = {
-  mutable pos : position option;
+  mutable position : position option;
   mutable selection_number : int option;
 }
 
@@ -280,24 +280,24 @@ and default_program_mutable () : program_mutable = {
 
 let rec default_cell 
   ?passable:((passable:bool option) = Some (true))
-  ?unit_id:((unit_id:program_id option) = None)
+  ?program_id:((program_id:program_id option) = None)
   ?credit_value:((credit_value:int option) = None)
   () : cell  = {
   passable;
-  unit_id;
+  program_id;
   credit_value;
 }
 
 and default_cell_mutable () : cell_mutable = {
   passable = Some (true);
-  unit_id = None;
+  program_id = None;
   credit_value = None;
 }
 
 let rec default_grid 
   ?width:((width:int option) = Some (16))
   ?height:((height:int option) = Some (13))
-  ?cells:((cells:cell list) = [])
+  ?cells:((cells:cell Pbrt.Repeated_field.t) = Pbrt.Repeated_field.make (default_cell ()))
   () : grid  = {
   width;
   height;
@@ -307,7 +307,7 @@ let rec default_grid
 and default_grid_mutable () : grid_mutable = {
   width = Some (16);
   height = Some (13);
-  cells = [];
+  cells = Pbrt.Repeated_field.make (default_cell ());
 }
 
 let rec default_game_state 
@@ -352,15 +352,15 @@ and default_starting_state_mutable () : starting_state_mutable = {
 }
 
 let rec default_player_configuration_program_selection 
-  ?pos:((pos:position option) = None)
+  ?position:((position:position option) = None)
   ?selection_number:((selection_number:int option) = None)
   () : player_configuration_program_selection  = {
-  pos;
+  position;
   selection_number;
 }
 
 and default_player_configuration_program_selection_mutable () : player_configuration_program_selection_mutable = {
-  pos = None;
+  position = None;
   selection_number = None;
 }
 
@@ -673,7 +673,7 @@ let rec decode_cell d =
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(cell), field(1)", pk))
     )
     | Some (2, Pbrt.Bytes) -> (
-      v.unit_id <- Some (decode_program_id (Pbrt.Decoder.nested d));
+      v.program_id <- Some (decode_program_id (Pbrt.Decoder.nested d));
       loop ()
     )
     | Some (2, pk) -> raise (
@@ -697,7 +697,6 @@ let rec decode_grid d =
   let rec loop () = 
     match Pbrt.Decoder.key d with
     | None -> (
-      v.cells <- List.rev v.cells;
     )
     | Some (1, Pbrt.Varint) -> (
       v.width <- Some (Pbrt.Decoder.int_as_varint d);
@@ -714,7 +713,7 @@ let rec decode_grid d =
       Protobuf.Decoder.Failure (Protobuf.Decoder.Unexpected_payload ("Message(grid), field(2)", pk))
     )
     | Some (3, Pbrt.Bytes) -> (
-      v.cells <- (decode_cell (Pbrt.Decoder.nested d)) :: v.cells;
+      Pbrt.Repeated_field.add (decode_cell (Pbrt.Decoder.nested d)) v.cells; 
       loop ()
     )
     | Some (3, pk) -> raise (
@@ -824,7 +823,7 @@ let rec decode_player_configuration_program_selection d =
     | None -> (
     )
     | Some (1, Pbrt.Bytes) -> (
-      v.pos <- Some (decode_position (Pbrt.Decoder.nested d));
+      v.position <- Some (decode_position (Pbrt.Decoder.nested d));
       loop ()
     )
     | Some (1, pk) -> raise (
@@ -1196,7 +1195,7 @@ let rec encode_cell (v:cell) encoder =
     | None -> ();
   );
   (
-    match v.unit_id with 
+    match v.program_id with 
     | Some x -> (
       Pbrt.Encoder.key (2, Pbrt.Bytes) encoder; 
       Pbrt.Encoder.nested (encode_program_id x) encoder;
@@ -1230,7 +1229,7 @@ let rec encode_grid (v:grid) encoder =
     )
     | None -> ();
   );
-  List.iter (fun x -> 
+  Pbrt.Repeated_field.iter (fun x -> 
     Pbrt.Encoder.key (3, Pbrt.Bytes) encoder; 
     Pbrt.Encoder.nested (encode_cell x) encoder;
   ) v.cells;
@@ -1300,7 +1299,7 @@ let rec encode_starting_state (v:starting_state) encoder =
 
 let rec encode_player_configuration_program_selection (v:player_configuration_program_selection) encoder = 
   (
-    match v.pos with 
+    match v.position with 
     | Some x -> (
       Pbrt.Encoder.key (1, Pbrt.Bytes) encoder; 
       Pbrt.Encoder.nested (encode_position x) encoder;
@@ -1492,7 +1491,7 @@ let rec pp_cell fmt (v:cell) =
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
     Pbrt.Pp.pp_record_field "passable" (Pbrt.Pp.pp_option Pbrt.Pp.pp_bool) fmt v.passable;
-    Pbrt.Pp.pp_record_field "unit_id" (Pbrt.Pp.pp_option pp_program_id) fmt v.unit_id;
+    Pbrt.Pp.pp_record_field "program_id" (Pbrt.Pp.pp_option pp_program_id) fmt v.program_id;
     Pbrt.Pp.pp_record_field "credit_value" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.credit_value;
     Format.pp_close_box fmt ()
   in
@@ -1503,7 +1502,7 @@ let rec pp_grid fmt (v:grid) =
     Format.pp_open_vbox fmt 1;
     Pbrt.Pp.pp_record_field "width" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.width;
     Pbrt.Pp.pp_record_field "height" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.height;
-    Pbrt.Pp.pp_record_field "cells" (Pbrt.Pp.pp_list pp_cell) fmt v.cells;
+    Pbrt.Pp.pp_record_field "cells" (Pbrt.Pp.pp_list pp_cell) fmt (Pbrt.Repeated_field.to_list v.cells);
     Format.pp_close_box fmt ()
   in
   Pbrt.Pp.pp_brk pp_i fmt ()
@@ -1534,7 +1533,7 @@ let rec pp_starting_state fmt (v:starting_state) =
 let rec pp_player_configuration_program_selection fmt (v:player_configuration_program_selection) = 
   let pp_i fmt () =
     Format.pp_open_vbox fmt 1;
-    Pbrt.Pp.pp_record_field "pos" (Pbrt.Pp.pp_option pp_position) fmt v.pos;
+    Pbrt.Pp.pp_record_field "position" (Pbrt.Pp.pp_option pp_position) fmt v.position;
     Pbrt.Pp.pp_record_field "selection_number" (Pbrt.Pp.pp_option Pbrt.Pp.pp_int) fmt v.selection_number;
     Format.pp_close_box fmt ()
   in

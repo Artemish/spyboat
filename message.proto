@@ -44,14 +44,14 @@ message Program {
 
 message Cell {
   optional bool passable = 1 [default = true];
-  optional ProgramId unit_id = 2;
+  optional ProgramId program_id = 2;
   optional uint32 credit_value = 3; 
 }
 
 message Grid {
   optional uint32 width = 1 [default = 16]; 
   optional uint32 height = 2 [default = 13]; 
-  repeated Cell cells = 3;
+  repeated Cell cells = 3 [(ocaml_container) = repeated_field];
 }
 
 message GameState {

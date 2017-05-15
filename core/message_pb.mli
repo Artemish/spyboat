@@ -45,14 +45,14 @@ type program = {
 
 type cell = {
   passable : bool option;
-  unit_id : program_id option;
+  program_id : program_id option;
   credit_value : int option;
 }
 
 type grid = {
   width : int option;
   height : int option;
-  cells : cell list;
+  cells : cell Pbrt.Repeated_field.t;
 }
 
 type game_state = {
@@ -71,7 +71,7 @@ type starting_state = {
 }
 
 type player_configuration_program_selection = {
-  pos : position option;
+  position : position option;
   selection_number : int option;
 }
 
@@ -157,7 +157,7 @@ val default_program :
 
 val default_cell : 
   ?passable:bool option ->
-  ?unit_id:program_id option ->
+  ?program_id:program_id option ->
   ?credit_value:int option ->
   unit ->
   cell
@@ -166,7 +166,7 @@ val default_cell :
 val default_grid : 
   ?width:int option ->
   ?height:int option ->
-  ?cells:cell list ->
+  ?cells:cell Pbrt.Repeated_field.t ->
   unit ->
   grid
 (** [default_grid ()] is the default value for type [grid] *)
@@ -191,7 +191,7 @@ val default_starting_state :
 (** [default_starting_state ()] is the default value for type [starting_state] *)
 
 val default_player_configuration_program_selection : 
-  ?pos:position option ->
+  ?position:position option ->
   ?selection_number:int option ->
   unit ->
   player_configuration_program_selection
